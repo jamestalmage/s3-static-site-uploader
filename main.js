@@ -24,11 +24,30 @@ Constructor.prototype = {
     loadCredentials:function(path){
         this._s3.config.loadFromPath(path);
     },
+    readFile: Q.denodeify(fs.readFile),
+    createReadAllBucketPolicy:function(bucketName){
+        return {
+            "Version": "2008-10-17",
+            "Statement": [
+                {
+                    "Sid": "PublicReadForGetBucketObjects",
+                    "Effect": "Allow",
+                    "Principal": {
+                        "AWS": "*"
+                    },
+                    "Action": "s3:GetObject",
+                    "Resource": "arn:aws:s3:::" + bucketName + "/*"
+                }
+            ]
+        };
+    }
+};
+
+var createParams = {
     createBucket:function(bucketName){
-        var params = {
+        return {
             Bucket: bucketName
         };
-        return Q.ninvoke(this._s3,'createBucket', params);
     },
     /*
      *  exists and is readable - promise resolves
@@ -36,34 +55,28 @@ Constructor.prototype = {
      *  exists and is forbidden - 403(Forbidden)
      */
     headBucket:function(bucketName){
-        var params = {
+        return {
             Bucket:bucketName
         };
-        return Q.ninvoke(this._s3,'headBucket',params);
     },
     putBucketPolicy:function(bucketName,policy){
         var policyString = JSON.stringify(policy);
 
-        var params = {
+        return {
             Bucket:bucketName,
             Policy:policyString
         };
-
-        return Q.ninvoke(this._s3,'putBucketPolicy',params);
     },
-    readFile: Q.denodeify(fs.readFile),
     putObject:function(bucketName, key, body,mimeType){
         mimeType = mimeType || mime.lookup(key);
 
        // console.log(body);
-        var params = {
+        return {
             Bucket:bucketName,
             Key: key,
             Body: body,//new Buffer(body),
             ContentType: mimeType
-
         };
-        return Q.ninvoke(this._s3,'putObject',params);
     },
     putBucketWebsite:function(bucketName,index,error) {
         var params = {
@@ -80,8 +93,7 @@ Constructor.prototype = {
                 Key:error
             };
         }
-
-        return Q.ninvoke(this._s3,'putBucketWebsite',params);
+        return params;
     },
 
     listObjects:function(bucketName,prefix){
@@ -91,30 +103,21 @@ Constructor.prototype = {
         if(prefix){
             params.Prefix = prefix;
         }
-
-        return Q.ninvoke(this._s3,'listObjects',params);
-
-
-    },
-
-    createReadAllBucketPolicy:function(bucketName){
-        return {
-            "Version": "2008-10-17",
-            "Statement": [
-            {
-                "Sid": "PublicReadForGetBucketObjects",
-                "Effect": "Allow",
-                "Principal": {
-                    "AWS": "*"
-                },
-                "Action": "s3:GetObject",
-                "Resource": "arn:aws:s3:::" + bucketName + "/*"
-            }
-        ]
-        };
+        return params;
     }
-
-
 };
+
+function addParameterFunction(functionName){
+    Constructor.prototype[functionName] = function(){
+        var params = createParams[functionName].apply(this,arguments);
+        return Q.ninvoke(this._s3,functionName,params);
+    }
+}
+
+for(var i in createParams){
+    if(createParams.hasOwnProperty(i)){
+        addParameterFunction(i);
+    }
+}
 
 module.exports = Constructor;

@@ -5,7 +5,7 @@ var siteMaker = new S3SiteMaker();
 
 siteMaker.loadCredentials('aws-credentials.json');
 
-var bucketName = 'test-bucket-name-james-talmage2';
+var bucketName = 'test-bucket-name-james-talmage3';
 
 
 function logResponse(funcName){
@@ -47,7 +47,7 @@ siteMaker
     .then(logResponse('putBucketPolicy'),logError('putBucketPolicy',true))
 
     .then(function(){
-        return siteMaker.putBucketWebsite(bucketName,'index.html','error.html');
+        return siteMaker.putBucketWebsite(bucketName,'index.html');
     })
 
     .then(function(){
