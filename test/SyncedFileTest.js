@@ -25,19 +25,18 @@ describe('SyncedFile', function () {
         sandbox.restore();
     });
 
+    function promiseStub(obj,method){
+        sandbox.stub(obj,method,function(){
+            var deferred = Q.defer();
+            var promise = deferred.promise;
+            promise._deferred = deferred;
+            return promise;
+        });
+    }
+
     beforeEach(function(){
-        sandbox.stub(fileUtils,'getContentHash',function(){
-            var deferred = Q.defer();
-            var promise = deferred.promise;
-            promise._deferred = deferred;
-            return promise;
-        });
-        sandbox.stub(fileUtils,'exists',function(){
-            var deferred = Q.defer();
-            var promise = deferred.promise;
-            promise._deferred = deferred;
-            return promise;
-        });
+        promiseStub(fileUtils,'getContentHash');
+        promiseStub(fileUtils,'exists');
     });
 
     var file, action;
@@ -46,8 +45,6 @@ describe('SyncedFile', function () {
         file = new SyncedFile(fileName,fileUtils);
         action = engine.wrap(file.action);
     });
-
-
 
     function assertHashNotCalled(done){
         setTimeout(function(){
