@@ -17,3 +17,7 @@ results
 npm-debug.log
 
 aws-credentials.json
+json/
+
+jasmine-1.1.0.js
+JasmineAdapter-1.1.2.js

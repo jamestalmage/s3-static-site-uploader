@@ -28,5 +28,13 @@
     "crypto": "0.0.3",
     "mime": "~1.2.9",
     "glob": "~3.2.1"
+  },
+
+  "devDependencies": {
+    "sinon-chai": "~2.4.0",
+    "chai": "~1.7.1",
+    "sinon": "~1.7.3",
+    "promise-testing": "git+ssh://git@git.jrtechnical.com:promise-testing",
+    "amdefine": "0.0.5"
   }
 }
