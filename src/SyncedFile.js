@@ -5,52 +5,26 @@ function SyncedFile (path,fileUtils,Q){
     Q = Q || require('Q');
 
 
-    var matchesGlob = false;
+    var exists = Q.defer();
 
-    var fetchingHash = false;
-    var hashDefer = Q.defer();
-    var hash = hashDefer.promise;
-
-    var remoteHashDefer = Q.defer();
-    var remoteHash = remoteHashDefer.promise;
+    var remoteHash = Q.defer();
 
 
     function foundFile(){
-        matchesGlob = true;
-        fetchHash();
+        exists.resolve(true);
     }
 
-    function fetchHash(){
-        if(fetchingHash) return;
-        fetchingHash = true;
-        fileUtils.getHashContents(path).then(hashDefer.resolve,hashDefer.reject).done();
-    }
 
-    function fetchHashIfFileExists(){
-        if(fetchingHash) return;
-        fileUtils.exists(path).then(function(exists){
-            if(exists) {
-                fetchHash();
-            }
-        }).done();
+    function globDone(){
+        exists.resolve(false);
     }
 
     function foundRemote(hash){
         remoteHash.resolve(hash);
-        fetchHashIfFileExists();
-    }
-
-    function globDone(){
-        if(!fetchingHash){
-            fetchingHash = true;
-            hashDefer.resolve(false);
-        }
     }
 
     function remoteDone(){
-        if(remoteHash.isPending()){
-            remoteHashDefer.resolve(false);
-        }
+        remoteHash.resolve(false);
     }
 
     this.foundFile = foundFile;
@@ -58,30 +32,34 @@ function SyncedFile (path,fileUtils,Q){
     this.globDone = globDone;
     this.remoteDone = remoteDone;
 
-    var actionDefer = Q.defer();
-    var action = actionDefer.promise;
-    this.action = action;
+    var action = Q.defer();
+    this.action = action.promise;
 
-
-    Q.spread([hash,remoteHash],function(hash,remoteHash){
-        if(hash && remoteHash){
-            if(hash === remoteHash){
-                action.resolve('nothing');
-            }
-            else {
-                action.resolve('upload');
-            }
+    Q.spread([exists.promise,remoteHash.promise],function(exists,remoteHash){
+        if(exists && remoteHash){
+            fileUtils.getContentHash(path).then(
+                function(localHash){
+                    if(localHash === remoteHash){
+                        action.resolve('nothing');
+                    }
+                    else {
+                        action.resolve('upload');
+                    }
+                },
+                action.reject
+            )
         }
-        if(hash){
+        else if(exists){
             action.resolve('upload');
         }
-        if(remoteHash){
+        else if(remoteHash){
             action.resolve('delete');
         }
-        throw new Error('this should never happen!');
+        else {
+            action.reject('This should never happen');
+            throw new Error('this should never happen!');
+        }
     });
-
-
 }
 
 module.exports = SyncedFile;

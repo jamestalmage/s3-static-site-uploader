@@ -35,13 +35,13 @@ function md5(str){
     return crypto.createHash('md5').update(str).digest('hex');
 }
 
-function getHashContentsPromises(paths){
+function getContentHashPromises(paths){
     return promise_translate( translate(paths,readFile),md5);
 }
 
-function getHashContents(path){
+function getContentHash(path){
     if(isArray(path)){
-        return Q.all(getHashContentsPromises(path));
+        return Q.all(getContentHashPromises(path));
     }
     return readFile(path).then(md5);
 }
@@ -54,7 +54,8 @@ function exists(path){
 
 
 module.exports = {
+    md5:md5,
     getContents: getFileContents,
-    getHashContents: getHashContents,
+    getContentHash: getContentHash,
     exists:exists
 };

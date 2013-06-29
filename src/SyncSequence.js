@@ -4,5 +4,10 @@ function SyncSequence (){
     var patterns = [];
     var map = {};
 
+    function addPattern(pattern){
+        pattern.push(pattern);
+    }
+
+
 
 }

@@ -22,7 +22,7 @@ function(chai,sinon,sinonChai,PromiseTester,chaiFlavor,fileUtils,BufferHelper){
 
 
     engine.patch(fileUtils,'getContents');
-    engine.patch(fileUtils,'getHashContents');
+    engine.patch(fileUtils,'getContentHash');
     engine.patch(fileUtils,'exists');
 
     describe('file-utils',function(){
@@ -68,13 +68,13 @@ function(chai,sinon,sinonChai,PromiseTester,chaiFlavor,fileUtils,BufferHelper){
 
         describe('getHashOfContents',function(){
             it(' should fetch the hash value of the contents of a file', function (done) {
-                fileUtils.getHashContents(testFilePath)
+                fileUtils.getContentHash(testFilePath)
                     .then.expect.result.to.equal(testFileHash)
                     .then.notify(done);
             });
 
             it(' should fetch the hash value of multiple files as an Array', function (done) {
-                fileUtils.getHashContents([testFilePath,testFilePath2])
+                fileUtils.getContentHash([testFilePath,testFilePath2])
                     .then.expect.result.to.deep.equal([testFileHash,testFileHash2])
                     .then.notify(done);
             });
