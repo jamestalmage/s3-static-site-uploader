@@ -1,10 +1,12 @@
-if (typeof define !== 'function') {
-    var define = require('amdefine')(module);
-}
-
-define(['chai','sinon','sinon-chai','promise-testing','promise-testing/lib/chai-flavor','../src/file-utils.js','./../test-lib/BufferHelper.js'],
-function(chai,sinon,sinonChai,PromiseTester,chaiFlavor,fileUtils,BufferHelper){
     'use strict';
+
+    var chai = require('chai');
+    var sinon = require('sinon');
+    var sinonChai = require('sinon-chai');
+    var PromiseTester = require('promise-testing');
+    var chaiFlavor = require('promise-testing/lib/chai-flavor');
+    var fileUtils = require('../src/file-utils.js');
+    var BufferHelper = require('../test-lib/BufferHelper.js');
 
     chai.use(BufferHelper);
     chai.use(sinonChai);
@@ -96,5 +98,3 @@ function(chai,sinon,sinonChai,PromiseTester,chaiFlavor,fileUtils,BufferHelper){
     });
 
 
-
-});
