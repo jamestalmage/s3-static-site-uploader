@@ -34,7 +34,6 @@
     "sinon-chai": "~2.4.0",
     "chai": "~1.7.1",
     "sinon": "~1.7.3",
-    "promise-testing": "git+ssh://git@git.jrtechnical.com:promise-testing",
-    "amdefine": "0.0.5"
+    "promise-testing": "git+ssh://git@git.jrtechnical.com:promise-testing"
   }
 }
