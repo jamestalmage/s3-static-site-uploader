@@ -1,6 +1,8 @@
 var GlobRunner = require('../src/GlobRunner.js');
 var chai = require('chai');
 var sinon = require('sinon');
+var GlobStub = require('./GlobStub.js');
+
 chai.use(require('sinon-chai'));
 chai.use(require('chai-things'));
 
@@ -8,14 +10,16 @@ var expect = chai.expect;
 
 describe('GlobRunner', function () {
 
+    var globRunner,patterns,globStub;
+    beforeEach(function(){
+        globStub = sinon.spy(GlobStub);
+        globRunner = new GlobRunner(globStub);
+        patterns = function (){
+            return globRunner.getPatterns();
+        } ;
+    });
+
     describe('addPattern',function(){
-        var globRunner,patterns;
-        beforeEach(function(){
-            globRunner = new GlobRunner();
-            patterns = function (){
-                    return globRunner.getPatterns();
-                } ;
-        });
 
         it('should add the pattern to patterns',function(){
             globRunner.addPattern('testPattern');
@@ -53,7 +57,29 @@ describe('GlobRunner', function () {
             expect(patterns()).to.have.lengthOf(2);
         });
 
+    });
 
-    })
+    describe('run',function(){
+
+        it('creates a glob for each added pattern', function(){
+            globRunner.addPattern('pattern1','pattern2');
+            globRunner.run();
+            expect(globStub).to.have.been.calledTwice;
+            expect(globStub).to.have.always.been.calledWithNew;
+            expect(globStub).to.have.been.calledWith('pattern1');
+            expect(globStub).to.have.been.calledWith('pattern2');
+        });
+
+        it('it adds an on(\'match\') listener', function(){
+            globRunner.addPattern('pattern1');
+            globRunner.run();
+            expect(globStub.thisValues[0].on).to.have.been.called;
+            expect(globStub.thisValues[0].on).to.have.been.calledWith('match',sinon.match.any);
+        });
+
+
+
+
+    });
 
 });
