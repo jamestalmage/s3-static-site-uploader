@@ -1,7 +1,7 @@
 
 
 
-function GlobRunner(Glob){
+function GlobRunner(/*SyncedFileCollection*/ collection,Glob){
     Glob = Glob || require('glob').Glob;
     var patterns = [];
     var globs = [];
@@ -33,7 +33,8 @@ function GlobRunner(Glob){
         return ret;
     }
 
-    function onMatch(pattern){
+    function onMatch(filePath){
+        collection.foundFile(filePath);
     }
 
     function createGlob(pattern){

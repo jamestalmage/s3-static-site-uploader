@@ -1,30 +1,56 @@
 var GlobRunner = require('../src/GlobRunner.js');
 var chai = require('chai');
 var sinon = require('sinon');
-var GlobStub = require('./GlobStub.js');
 
 chai.use(require('sinon-chai'));
 chai.use(require('chai-things'));
 
 var expect = chai.expect;
+var match = sinon.match;
 
 describe('GlobRunner', function () {
 
-    var globRunner,patterns,globStub;
+    var globRunner,patterns,GlobStub,glob,CollectionStub,collection;
+
+    function new_GlobRunner(){
+        //constructor injection of stubs
+        return new GlobRunner(new CollectionStub(),GlobStub);
+    }
+
     beforeEach(function(){
-        globStub = sinon.spy(GlobStub);
-        globRunner = new GlobRunner(globStub);
+        GlobStub = sinon.spy(require('./GlobStub.js'));
+        CollectionStub = sinon.spy(require('./SyncedFileCollectionStub.js'));
+        expect(GlobStub).not.to.have.been.called; //proof counter has been reset.
+        expect(CollectionStub).not.to.have.been.called; //proof counter has been reset.
+
+        globRunner = new_GlobRunner();
         patterns = function (){
             return globRunner.getPatterns();
-        } ;
+        };
+        glob = function(index){
+            return GlobStub.thisValues[index];
+        };
+        collection = function(index){
+            return CollectionStub.thisValues[index];
+        };
+    });
+
+    it('constructor creates a new SyncedFileCollection',function(){
+        //constructor called in beforeEach
+        expect(CollectionStub)
+            .to.have.been.calledOnce
+            .and.calledWithNew;
+        new_GlobRunner();
+        expect(CollectionStub)
+            .to.have.been.calledTwice
+            .and.to.have.always.been.calledWithNew;
     });
 
     describe('addPattern',function(){
 
         it('should add the pattern to patterns',function(){
             globRunner.addPattern('testPattern');
-
-           expect(patterns()).to.deep.equal(['testPattern']) ;
+            expect(patterns()).to.deep.equal(['testPattern']) ;
         });
 
         it('should not add the same pattern twice',function(){
@@ -64,21 +90,61 @@ describe('GlobRunner', function () {
         it('creates a glob for each added pattern', function(){
             globRunner.addPattern('pattern1','pattern2');
             globRunner.run();
-            expect(globStub).to.have.been.calledTwice;
-            expect(globStub).to.have.always.been.calledWithNew;
-            expect(globStub).to.have.been.calledWith('pattern1');
-            expect(globStub).to.have.been.calledWith('pattern2');
+
+            expect(GlobStub)
+                .to.have.been
+                .calledTwice
+                .and.calledWith('pattern1')
+                .and.calledWith('pattern2')
+                .and.always.calledWithNew;
         });
 
-        it('it adds an on(\'match\') listener', function(){
+        it('adds an on(\'match\') listener', function(){
             globRunner.addPattern('pattern1');
             globRunner.run();
-            expect(globStub.thisValues[0].on).to.have.been.called;
-            expect(globStub.thisValues[0].on).to.have.been.calledWith('match',sinon.match.any);
+
+            expect(glob(0).on)
+                .to.have.been.calledOnce
+                .and.calledWith('match',match.any);
         });
 
+        it('triggering the onMatch listener will cause a matching foundFile call to the collection',function(){
+            globRunner.addPattern('pattern1');
+            globRunner.run();
+            glob(0).fire('match','path/to/my/File');
 
+            expect(collection(0).foundFile)
+                .to.have.been
+                .calledOnce
+                .and.calledWith('path/to/my/File');
+        });
 
+        it('subsequent onMatch calls will continue adding to the collection',function(){
+            globRunner.addPattern('pattern1');
+            globRunner.run();
+            glob(0).fire('match','path/to/File1');
+            glob(0).fire('match','path/to/File2');
+
+            expect(collection(0).foundFile)
+                .to.have.been
+                .calledTwice
+                .and.calledWith('path/to/File1')
+                .and.calledWith('path/to/File2');
+        });
+
+        it('multiple patterns can be used to add to the collection',function(){
+            globRunner.addPattern('pattern1','pattern2');
+            globRunner.run();
+
+            glob(0).fire('match','path/to/File1');
+            glob(1).fire('match','path/to/File2');
+
+            expect(collection(0).foundFile)
+                .to.have.been
+                .calledTwice
+                .and.calledWith('path/to/File1')
+                .and.calledWith('path/to/File2');
+        }) ;
 
     });
 

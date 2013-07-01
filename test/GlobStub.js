@@ -10,9 +10,9 @@ function Glob(){
 
     this.fire = function(eventType,remainingArgs){
         remainingArgs = Array.prototype.slice.call(arguments,1);
-        this.on.calls.forEach(function(onCall){
-            if(eventType === onCall.arguments[0]){
-                onCall.arguments[1].apply(thisGlob,remainingArgs);
+        thisGlob.on.args.forEach(function(args){
+            if(eventType === args[0]){
+                args[1].apply(thisGlob,remainingArgs);
             }
         });
     };
