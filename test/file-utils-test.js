@@ -11,17 +11,11 @@
     chai.use(BufferHelper);
     chai.use(sinonChai);
 
-
-
     var expect = chai.expect,
         match = sinon.match,
         engine = new PromiseTester();
 
-
-
-
     engine.use(chaiFlavor(chai));
-
 
     engine.patch(fileUtils,'getContents');
     engine.patch(fileUtils,'getContentHash');
@@ -39,7 +33,6 @@
             testFilePath2 = './test/testfile2.txt';
             testFileHash2 = require('crypto').createHash('md5').update('goodbye!').digest('hex');
         });
-
 
         describe('getContents ',function(){
             it(' should fetch the contents of a single file', function (done) {
