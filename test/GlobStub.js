@@ -1,5 +1,3 @@
-var sinon = require('sinon');
-
 function Glob(){
 
     var thisGlob = this;

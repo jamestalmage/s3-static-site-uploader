@@ -1,16 +1,4 @@
 var GlobRunner = require('../src/GlobRunner.js');
-var chai = require('chai');
-var sinon = require('sinon');
-
-chai.use(require('sinon-chai'));
-chai.use(require('chai-things'));
-
-var expect = chai.expect;
-var match = sinon.match;
-
-var PromiseEngine =  require('promise-testing');
-var engine = new PromiseEngine();
-engine.use(require('promise-testing/lib/chai-flavor')(chai));
 
 describe('GlobRunner', function () {
 

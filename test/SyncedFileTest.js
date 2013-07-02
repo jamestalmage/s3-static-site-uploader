@@ -1,18 +1,6 @@
-
-
-var chai = require('chai');
-var sinon = require('sinon');
-var sinonChai = require('sinon-chai');
 var Q = require('Q');
 var SyncedFile = require('../src/SyncedFile.js');
 var fileUtils = require('../src/file-utils.js');
-var promiseTesting = require('promise-testing');
-var chaiFlavor = require('promise-testing/lib/chai-flavor');
-
-chai.use(sinonChai);
-var engine = new promiseTesting();
-engine.use(chaiFlavor(chai));
-var expect = chai.expect;
 
 describe('SyncedFile', function () {
     var sandbox,fileName;
@@ -112,7 +100,6 @@ describe('SyncedFile', function () {
     });
 
     it('when local is found, and remote is not, Action is upload',function(done){
-
         expectAction('upload').then.notify(done);
 
         file.foundFile();

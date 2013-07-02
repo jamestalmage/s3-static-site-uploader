@@ -1,13 +1,4 @@
-var chai = require('chai');
-var sinon = require('sinon');
-
-chai.use(require('sinon-chai'));
-chai.use(require('chai-things'));
-
-var expect = chai.expect;
-
 var SyncedFileCollection = require('../src/SyncedFileCollection.js');
-
 
 describe('SyncedFileCollection', function () {
 
@@ -71,8 +62,6 @@ describe('SyncedFileCollection', function () {
         });
     });
 
-
-
     describe('foundRemote',function(){
         it('should create a new SyncedFile the first time a particular path is found', function () {
             collection.foundRemote('myPath','myHash');
@@ -124,7 +113,6 @@ describe('SyncedFileCollection', function () {
     });
 
     describe('globDone',function(){
-
         it('should call globDone on each SyncedFile created',function(){
             collection.foundFile('myFile');
             collection.foundFile('yourFile');
@@ -132,7 +120,7 @@ describe('SyncedFileCollection', function () {
             expect(fileStub(0).globDone).to.have.been.called;
             expect(fileStub(1).globDone).to.have.been.called;
         });
-    })
+    });
 
 
 });

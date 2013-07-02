@@ -1,5 +1,3 @@
-var sinon = require('sinon');
-
 function S3Stub(){
     var thisStub = this;
     [

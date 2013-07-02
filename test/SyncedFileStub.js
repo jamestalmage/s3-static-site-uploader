@@ -1,4 +1,3 @@
-var sinon = require('sinon');
 var Q = require('Q');
 
 function SyncedFileStub(){

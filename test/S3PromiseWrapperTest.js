@@ -1,22 +1,6 @@
-var chai = require('chai');
-var sinon = require('sinon');
-
-chai.use(require('sinon-chai'));
-chai.use(require('chai-things'));
-
-var expect = chai.expect;
-var match = sinon.match;
-
 var S3Stub = require('./S3Stub.js');
 var S3PromiseWrapper = require('../src/S3PromiseWrapper.js');
-
-var PromiseEngine = require('promise-testing');
-var chaiFlavor = require('promise-testing/lib/chai-flavor');
-
 var Q = require('Q');
-
-var engine = new PromiseEngine();
-engine.use(chaiFlavor(chai));
 
 engine.use(function(props,handlers){
     props.addProperty('firstCall',handlers.echoHandler);

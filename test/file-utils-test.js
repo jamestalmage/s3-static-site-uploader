@@ -1,21 +1,6 @@
     'use strict';
 
-    var chai = require('chai');
-    var sinon = require('sinon');
-    var sinonChai = require('sinon-chai');
-    var PromiseTester = require('promise-testing');
-    var chaiFlavor = require('promise-testing/lib/chai-flavor');
     var fileUtils = require('../src/file-utils.js');
-    var BufferHelper = require('../test-lib/BufferHelper.js');
-
-    chai.use(BufferHelper);
-    chai.use(sinonChai);
-
-    var expect = chai.expect,
-        match = sinon.match,
-        engine = new PromiseTester();
-
-    engine.use(chaiFlavor(chai));
 
     engine.patch(fileUtils,'getContents');
     engine.patch(fileUtils,'getContentHash');
