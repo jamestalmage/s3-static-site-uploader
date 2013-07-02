@@ -16,8 +16,17 @@ function SyncedFileCollection(SyncedFile){
         get(path).foundRemote(hash);
     }
 
+    function globDone(){
+        for(var i in map){
+            if(map.hasOwnProperty(i)){
+                map[i].globDone();
+            }
+        }
+    }
+
     this.foundFile = foundFile;
     this.foundRemote = foundRemote;
+    this.globDone = globDone;
 }
 
 module.exports = SyncedFileCollection;

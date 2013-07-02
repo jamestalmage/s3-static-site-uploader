@@ -1,4 +1,5 @@
 
+var Q = require('Q');
 
 
 function GlobRunner(/*SyncedFileCollection*/ collection,Glob){
@@ -37,19 +38,26 @@ function GlobRunner(/*SyncedFileCollection*/ collection,Glob){
         collection.foundFile(filePath);
     }
 
+    var globsDone=[];
+
     function createGlob(pattern){
         var glob =  new Glob(pattern);
         globs.push(glob);
 
         glob.on('match',onMatch);
 
+        var defer = Q.defer();
+        globsDone.push(defer.promise);
+
+        glob.on('end',defer.resolve);
+        glob.on('error',defer.reject);
+
         return glob;
     }
 
-
-
     function run(){
         patterns.forEach(createGlob);
+        return Q.all(globsDone).then(collection.globDone);
     }
 
     this.run = run;

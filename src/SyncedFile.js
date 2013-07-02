@@ -4,16 +4,13 @@ function SyncedFile (path,fileUtils,Q){
     fileUtils = fileUtils || require( './file-utils.js');
     Q = Q || require('Q');
 
-
     var exists = Q.defer();
-
     var remoteHash = Q.defer();
-
+    var action = Q.defer();
 
     function foundFile(){
         exists.resolve(true);
     }
-
 
     function globDone(){
         exists.resolve(false);
@@ -26,14 +23,6 @@ function SyncedFile (path,fileUtils,Q){
     function remoteDone(){
         remoteHash.resolve(false);
     }
-
-    this.foundFile = foundFile;
-    this.foundRemote = foundRemote;
-    this.globDone = globDone;
-    this.remoteDone = remoteDone;
-
-    var action = Q.defer();
-    this.action = action.promise;
 
     Q.spread([exists.promise,remoteHash.promise],function(exists,remoteHash){
         if(exists && remoteHash){
@@ -60,6 +49,12 @@ function SyncedFile (path,fileUtils,Q){
             throw new Error('this should never happen!');
         }
     });
+
+    this.foundFile = foundFile;
+    this.foundRemote = foundRemote;
+    this.globDone = globDone;
+    this.remoteDone = remoteDone;
+    this.action = action.promise;
 }
 
 module.exports = SyncedFile;

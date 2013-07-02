@@ -123,6 +123,17 @@ describe('SyncedFileCollection', function () {
         });
     });
 
+    describe('globDone',function(){
+
+        it('should call globDone on each SyncedFile created',function(){
+            collection.foundFile('myFile');
+            collection.foundFile('yourFile');
+            collection.globDone();
+            expect(fileStub(0).globDone).to.have.been.called;
+            expect(fileStub(1).globDone).to.have.been.called;
+        });
+    })
+
 
 });
 

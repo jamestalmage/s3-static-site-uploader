@@ -8,13 +8,22 @@ chai.use(require('chai-things'));
 var expect = chai.expect;
 var match = sinon.match;
 
+var PromiseEngine =  require('promise-testing');
+var engine = new PromiseEngine();
+engine.use(require('promise-testing/lib/chai-flavor')(chai));
+
 describe('GlobRunner', function () {
 
     var globRunner,patterns,GlobStub,glob,CollectionStub,collection;
 
     function new_GlobRunner(){
         //constructor injection of stubs
-        return new GlobRunner(new CollectionStub(),GlobStub);
+        var ret = new GlobRunner(new CollectionStub(),GlobStub);
+
+        engine.patch(ret,'run');
+
+        return ret;
+
     }
 
     beforeEach(function(){
@@ -103,9 +112,14 @@ describe('GlobRunner', function () {
             globRunner.addPattern('pattern1');
             globRunner.run();
 
-            expect(glob(0).on)
-                .to.have.been.calledOnce
-                .and.calledWith('match',match.any);
+            expect(glob(0).on).to.have.been.calledWith('match',match.any);
+        });
+
+        it('adds an on(\'end\') listener', function(){
+            globRunner.addPattern('pattern1');
+            globRunner.run();
+
+            expect(glob(0).on).to.have.been.calledWith('end',match.any);
         });
 
         it('triggering the onMatch listener will cause a matching foundFile call to the collection',function(){
@@ -144,7 +158,23 @@ describe('GlobRunner', function () {
                 .calledTwice
                 .and.calledWith('path/to/File1')
                 .and.calledWith('path/to/File2');
-        }) ;
+        });
+
+        it('once all the globs end it calls globDone on the collection',function(done){
+            globRunner.addPattern('pattern1','pattern2');
+            globRunner.run().then.expect(collection(0).globDone).to.have.been.called.then.notify(done);
+
+            glob(0).fire('end');//,'path/to/File1');
+            glob(1).fire('end');//,'path/to/File2');
+        });
+
+        it('an error in the glob should cause the run promise to reject',function(done){
+            globRunner.addPattern('pattern1','pattern2');
+            globRunner.run().then.expect.rejection.then.notify(done);
+
+            glob(0).fire('end');//,'path/to/File1');
+            glob(1).fire('error');//,'path/to/File2');
+        });
 
     });
 

@@ -33,6 +33,7 @@ describe('S3PromiseWrapper', function () {
         s3 = new S3Stub();
         wrapper = new S3PromiseWrapper(s3);
         engine.patch(wrapper,'headBucket');
+        engine.patch(wrapper,'checkBucketName');
     });
 
     function later(result){
@@ -47,9 +48,9 @@ describe('S3PromiseWrapper', function () {
         return engine.wrap(deferred.promise).then;
     }
 
-    describe('headBucket', function () {
+    describe('checkBucketName', function () {
         it('calls headBucket on s3 with bucketName',function(done){
-            wrapper.headBucket('myBucket');
+            wrapper.checkBucketName('myBucket');
 
             later().expect(s3.headBucket)
                 .to.have.been
@@ -60,17 +61,17 @@ describe('S3PromiseWrapper', function () {
 
         it('existing buckets that you have access to resolve to "owned"',function(done){
             s3.headBucket.callsArgWithAsync(1,null,{RequestId: '955C7251CF7337EE'});
-            wrapper.headBucket('myBucket').then.expect.result.to.equal('owned').then.notify(done);
+            wrapper.checkBucketName('myBucket').then.expect.result.to.equal('owned').then.notify(done);
         });
 
         it('existing buckets that you do not have access to resolve to "forbidden"',function(done){
             s3.headBucket.callsArgWithAsync(1,{statusCode: 403,code:'Forbidden',name:'Forbidden',retryable:false});
-            wrapper.headBucket('myBucket').then.expect.result.to.equal('forbidden').then.notify(done);
+            wrapper.checkBucketName('myBucket').then.expect.result.to.equal('forbidden').then.notify(done);
         });
 
         it('non existent buckets resolve to "available"',function(done){
             s3.headBucket.callsArgWithAsync(1,{statusCode: 404,code:'NotFound',name:'NotFound',retryable:false});
-            wrapper.headBucket('myBucket').then.expect.result.to.equal('available').then.notify(done);
+            wrapper.checkBucketName('myBucket').then.expect.result.to.equal('available').then.notify(done);
         });
     });
 });

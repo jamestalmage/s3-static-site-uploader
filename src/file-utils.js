@@ -35,6 +35,10 @@ function md5(str){
     return crypto.createHash('md5').update(str).digest('hex');
 }
 
+function base64(str){
+    return new Buffer(str).toString('base64');
+}
+
 function getContentHashPromises(paths){
     return promise_translate( translate(paths,readFile),md5);
 }
