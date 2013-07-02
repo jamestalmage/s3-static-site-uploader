@@ -1,6 +1,6 @@
     'use strict';
 
-    var fileUtils = require('../src/file-utils.js');
+    var fileUtils = requireCov('../src/file-utils.js');
 
     engine.patch(fileUtils,'getContents');
     engine.patch(fileUtils,'getContentHash');

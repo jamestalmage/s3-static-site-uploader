@@ -1,4 +1,4 @@
-var SyncedFileCollection = require('../src/SyncedFileCollection.js');
+var SyncedFileCollection = requireCov('../src/SyncedFileCollection.js');
 
 describe('SyncedFileCollection', function () {
 

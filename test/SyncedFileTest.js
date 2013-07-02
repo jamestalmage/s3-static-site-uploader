@@ -1,6 +1,6 @@
 var Q = require('Q');
-var SyncedFile = require('../src/SyncedFile.js');
-var fileUtils = require('../src/file-utils.js');
+var SyncedFile = requireCov('../src/SyncedFile.js');
+var fileUtils = requireCov('../src/file-utils.js');
 
 describe('SyncedFile', function () {
     var sandbox,fileName;

@@ -1,5 +1,5 @@
 var S3Stub = require('./S3Stub.js');
-var S3PromiseWrapper = require('../src/S3PromiseWrapper.js');
+var S3PromiseWrapper = requireCov('../src/S3PromiseWrapper.js');
 var Q = require('Q');
 
 engine.use(function(props,handlers){

@@ -1,4 +1,4 @@
-var GlobRunner = require('../src/GlobRunner.js');
+var GlobRunner = requireCov('../src/GlobRunner.js');
 
 describe('GlobRunner', function () {
 

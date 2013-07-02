@@ -15,3 +15,13 @@ engine.use(chaiFlavor(chai));
 
 global.engine = engine;
 
+global.requireCov = function(path){
+    if(process && process.env && process.env.S3_UPLOAD_COV){
+        path = path.replace('../src/','../../src-cov/');
+    }
+    else {
+        path = path.replace('../src/','../../src/');
+    }
+    return require(path);
+};
+
