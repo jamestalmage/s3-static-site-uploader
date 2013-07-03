@@ -43,19 +43,28 @@ describe('S3PromiseWrapper', function () {
                 .then.notify(done);
         });
 
-        it('existing buckets that you have access to resolve to "owned"',function(done){
+        it('existing buckets to which you have access (http success) resolve to "owned"',function(done){
             s3.headBucket.callsArgWithAsync(1,null,{RequestId: '955C7251CF7337EE'});
             wrapper.checkBucketName('myBucket').then.expect.result.to.equal('owned').then.notify(done);
         });
 
-        it('existing buckets that you do not have access to resolve to "forbidden"',function(done){
+        it('existing buckets to which you do not have access (http error 403) resolve to "forbidden"',function(done){
             s3.headBucket.callsArgWithAsync(1,{statusCode: 403,code:'Forbidden',name:'Forbidden',retryable:false});
             wrapper.checkBucketName('myBucket').then.expect.result.to.equal('forbidden').then.notify(done);
         });
 
-        it('non existent buckets resolve to "available"',function(done){
+        it('non existent buckets (http error 404) resolve to "available"',function(done){
             s3.headBucket.callsArgWithAsync(1,{statusCode: 404,code:'NotFound',name:'NotFound',retryable:false});
             wrapper.checkBucketName('myBucket').then.expect.result.to.equal('available').then.notify(done);
+        });
+
+        it('other http errors reject the promise',function(done){
+            s3.headBucket.callsArgWithAsync(1,
+                {statusCode: 408, code:'RequestTimeout', name:'RequestTimeout',retryable:false}
+            );
+            wrapper.checkBucketName('myBucket').then.expect.rejection.deep.equal(
+                {statusCode: 408, code:'RequestTimeout', name:'RequestTimeout',retryable:false}
+            ).then.notify(done);
         });
     });
 });
