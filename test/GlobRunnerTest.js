@@ -15,8 +15,8 @@ describe('GlobRunner', function () {
     }
 
     beforeEach(function(){
-        GlobStub = sinon.spy(require('./GlobStub.js'));
-        CollectionStub = sinon.spy(require('./SyncedFileCollectionStub.js'));
+        GlobStub = sinon.spy(require('./../test-lib/GlobStub.js'));
+        CollectionStub = sinon.spy(require('./../test-lib/SyncedFileCollectionStub.js'));
         expect(GlobStub).not.to.have.been.called; //proof counter has been reset.
         expect(CollectionStub).not.to.have.been.called; //proof counter has been reset.
 

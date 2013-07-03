@@ -1,4 +1,4 @@
-var S3Stub = require('./S3Stub.js');
+var S3Stub = require('./../test-lib/S3Stub.js');
 var S3PromiseWrapper = requireCov('../src/S3PromiseWrapper.js');
 var Q = require('Q');
 

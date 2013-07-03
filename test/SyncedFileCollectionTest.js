@@ -5,7 +5,7 @@ describe('SyncedFileCollection', function () {
     var SyncedFileStub, collection;
 
     beforeEach(function(){
-        SyncedFileStub = sinon.spy(require('./SyncedFileStub.js'));
+        SyncedFileStub = sinon.spy(require('./../test-lib/SyncedFileStub.js'));
         expect(SyncedFileStub).not.to.have.been.called; // proof the call count has been reset
         collection = new SyncedFileCollection(SyncedFileStub);
     });
