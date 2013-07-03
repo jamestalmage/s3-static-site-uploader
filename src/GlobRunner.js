@@ -27,13 +27,6 @@ function GlobRunner(/*SyncedFileCollection*/ collection,Glob){
         }
     }
 
-
-    function map(arr, fn){
-        var ret = [];
-        arr.forEach(function(val){arr.push(fn(val))});
-        return ret;
-    }
-
     function onMatch(filePath){
         collection.foundFile(filePath);
     }
