@@ -4,16 +4,17 @@ function SyncedFile (path,fileUtils,Q){
     fileUtils = fileUtils || require( './file-utils.js');
     Q = Q || require('Q');
 
-    var exists = Q.defer();
+    var del = Q.defer();
+    var upload = Q.defer();
     var remoteHash = Q.defer();
     var action = Q.defer();
 
     function foundFile(){
-        exists.resolve(true);
+        del.resolve(false);
     }
 
     function globDone(){
-        exists.resolve(false);
+        del.resolve(true);
     }
 
     function foundRemote(hash){
@@ -24,14 +25,17 @@ function SyncedFile (path,fileUtils,Q){
         remoteHash.resolve(false);
     }
 
-    Q.spread([exists.promise,remoteHash.promise],function(exists,remoteHash){
+    Q.spread([del.promise,remoteHash.promise],function(del,remoteHash){
+        var exists = !del;
         if(exists && remoteHash){
             fileUtils.getContentHash(path).then(
                 function(localHash){
                     if(localHash === remoteHash){
+                        upload.resolve(false);
                         action.resolve('nothing');
                     }
                     else {
+                        upload.resolve(true);
                         action.resolve('upload');
                     }
                 },
@@ -39,9 +43,11 @@ function SyncedFile (path,fileUtils,Q){
             )
         }
         else if(exists){
+            upload.resolve(true);
             action.resolve('upload');
         }
         else if(remoteHash){
+            upload.resolve(false);
             action.resolve('delete');
         }
         else {
@@ -55,6 +61,8 @@ function SyncedFile (path,fileUtils,Q){
     this.globDone = globDone;
     this.remoteDone = remoteDone;
     this.action = action.promise;
+    this.delete = del.promise;
+    this.upload = upload.promise;
 }
 
 module.exports = SyncedFile;

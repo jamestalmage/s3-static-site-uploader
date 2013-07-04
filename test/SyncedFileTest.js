@@ -31,7 +31,9 @@ describe('SyncedFile', function () {
     beforeEach(function(){
         fileName = './test/testfile.txt';
         file = new SyncedFile(fileName,fileUtils);
-        action = engine.wrap(file.action);
+        action = file.action = engine.wrap(file.action);
+        file.delete = engine.wrap(file.delete);
+        file.upload = engine.wrap(file.upload);
     });
 
     function assertHashNotCalled(done){
@@ -53,7 +55,20 @@ describe('SyncedFile', function () {
     }
 
     function expectAction(actionType){
-        return action.then.expect.result.to.equal(actionType);
+        return expectThen('action',actionType);
+        //return action.then.expect.result.to.equal(actionType);
+    }
+
+    function expectDelete(val){
+        return expectThen('delete',val);
+    }
+
+    function expectUpload(val){
+        return expectThen('upload',val);
+    }
+
+    function expectThen(prop,value){
+        return file[prop].then.expect.result.to.equal(value);
     }
 
     it('constructor does not immediately hash the file', function (done) {
@@ -70,42 +85,99 @@ describe('SyncedFile', function () {
         assertHashNotCalled(done);
     });
 
+    describe('action promise',function(){
 
-    it('when remoteHash is found, but local does not exist. Action is delete.', function(done){
-        expectAction('delete').then.notify(done);
+        it('resolves to delete when remoteHash is found, but local does not exist', function(done){
+            expectAction('delete').then.notify(done);
 
-        file.foundRemote("HASH VALUE");
-        file.globDone();
+            file.foundRemote("HASH VALUE");
+            file.globDone();
+        });
+
+        it('resolves to upload when remoteHash is found, and local has a different hash value',function(done){
+            expectAction('upload').then.notify(done);
+
+            file.foundRemote("HASH VALUE");
+            file.foundFile();
+            setTimeout(function(){
+                fileUtils.getContentHash.firstCall.returnValue._deferred.resolve('Some Other Hash');
+            },10);
+        });
+
+
+        it('resolves to nothing when remoteHash is found, and local has the same hash value',function(done){
+            expectAction('nothing').then.notify(done);
+
+            file.foundRemote("HASH VALUE");
+            file.foundFile();
+            setTimeout(function(){
+                fileUtils.getContentHash.firstCall.returnValue._deferred.resolve('HASH VALUE');
+            },10);
+        });
+
+        it('resolves to upload when local is found, and remote is not',function(done){
+            expectAction('upload').then.notify(done);
+
+            file.foundFile();
+            file.remoteDone();
+        });
+
     });
 
-    it('when remoteHash is found, and local has a different hash value, Action is upload',function(done){
-        expectAction('upload').then.notify(done);
+    describe('delete promise',function(){
 
-        file.foundRemote("HASH VALUE");
-        file.foundFile();
-        setTimeout(function(){
-            fileUtils.getContentHash.firstCall.returnValue._deferred.resolve('Some Other Hash');
-        },10);
+        it('resolves to true if found remotely, but not locally',function(done){
+            expectDelete(true).then.notify(done);
+            file.foundRemote('HASH VALUE');
+            file.globDone();
+        });
+
+        it('resolves to false if found locally, but not remotely',function(done){
+            expectDelete(false).then.notify(done);
+            file.foundFile();
+            file.remoteDone();
+        });
+
+        it('resolves to false if found found both places - even before local hash is fetched',function(done){
+            expectDelete(false).then.notify(done);
+            file.foundFile();
+            file.foundRemote('remoteHash');
+        });
+
     });
 
+    describe('upload promise',function(){
 
-    it('when remoteHash is found, and local has the same hash value, Action is nothing',function(done){
-        expectAction('nothing').then.notify(done);
+        it('resolves to false if found remotely, but not locally',function(done){
+            expectUpload(false).then.notify(done);
+            file.foundRemote('HASH VALUE');
+            file.globDone();
+        });
 
-        file.foundRemote("HASH VALUE");
-        file.foundFile();
-        setTimeout(function(){
-            fileUtils.getContentHash.firstCall.returnValue._deferred.resolve('HASH VALUE');
-        },10);
+        it('resolves to true if found locally, but not remotely',function(done){
+            expectUpload(true).then.notify(done);
+            file.foundFile();
+            file.remoteDone();
+        });
+
+        it('resolves to false if found found both places - and both hashes are the same',function(done){
+            expectUpload(false).then.notify(done);
+            file.foundFile();
+            file.foundRemote('remoteHash');
+            setTimeout(function(){
+                fileUtils.getContentHash.firstCall.returnValue._deferred.resolve('remoteHash');
+            },10);
+        });
+
+        it('resolves to true if found found both places - and the hashes are different',function(done){
+            expectUpload(true).then.notify(done);
+            file.foundFile();
+            file.foundRemote('remoteHash');
+            setTimeout(function(){
+                fileUtils.getContentHash.firstCall.returnValue._deferred.resolve('some other remoteHash');
+            },10);
+        });
+
     });
-
-    it('when local is found, and remote is not, Action is upload',function(done){
-        expectAction('upload').then.notify(done);
-
-        file.foundFile();
-        file.remoteDone();
-    });
-
-
 
 });
