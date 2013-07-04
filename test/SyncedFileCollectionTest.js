@@ -130,7 +130,106 @@ describe('SyncedFileCollection', function () {
             expect(fileStub(0).remoteDone).to.have.been.called;
             expect(fileStub(1).remoteDone).to.have.been.called;
         });
-    })
+    });
+
+    describe('allDone',function(){
+
+        it('is pending prior to globDone', function (done) {
+            collection.remoteDone();
+            later()(function(){
+                expect(collection.allDone.isPending()).to.be.true;
+            }).then.notify(done);
+        });
+
+        it('is pending prior to remoteDone', function (done) {
+            collection.globDone();
+            later()(function(){
+                expect(collection.allDone.isPending()).to.be.true;
+            }).then.notify(done);
+        });
+
+        it('is fulfilled once glob and remote are done, and no files were found', function (done) {
+            collection.globDone();
+            collection.remoteDone();
+            later()(function(){
+                expect(collection.allDone.isFulfilled()).to.be.true;
+            }).then.notify(done);
+        });
+
+        it('is fulfilled once glob and remote are done, and only local files were found', function (done) {
+            //Relies on implementation details of SyncedFile - can't use a stub
+            collection = new SyncedFileCollection();
+            collection.foundFile('file1');
+            collection.foundFile('file2');
+            collection.globDone();
+            collection.remoteDone();
+            later()(function(){
+                expect(collection.allDone.isFulfilled()).to.be.true;
+            }).then.notify(done);
+        });
+
+        it('is fulfilled once glob and remote are done, and only remote files were found', function (done) {
+            //Relies on implementation details of SyncedFile - can't use a stub
+            collection = new SyncedFileCollection();
+            collection.foundRemote('file1','hash1');
+            collection.foundRemote('file2','hash2');
+            collection.globDone();
+            collection.remoteDone();
+            later()(function(){
+                expect(collection.allDone.isFulfilled()).to.be.true;
+            }).then.notify(done);
+        });
+
+        var fileUtilsStub = require('../test-lib/file-utils-stub');
+        afterEach(function(){
+            fileUtilsStub.restore();
+        });
+
+        var SyncedFile = requireCov('../src/SyncedFile');
+
+        function SyncedFileWithStubbedFileSystem(fileName){
+            return new SyncedFile(fileName,fileUtilsStub);
+        }
+
+        it('is fulfilled once glob and remote are done, and all found files matched', function (done) {
+            //Relies on implementation details of SyncedFile - can't use a stub
+            collection = new SyncedFileCollection(SyncedFileWithStubbedFileSystem);
+            collection.foundRemote('file1','hash1');
+            collection.foundRemote('file2','hash2');
+            collection.foundFile('file1');
+            collection.globDone();
+            collection.remoteDone();
+            later()(function(){
+                var promise = fileUtilsStub.getContentHash.withArgs('file1').firstCall.returnValue;
+                promise._deferred.resolve('hash1');
+                return later(); //adds an additional delay
+            }).then(function(){
+                expect(collection.allDone.isFulfilled()).to.be.true;
+            }).then.notify(done);
+        });
+
+
+        it('is fulfilled once glob and remote are done, and all found files don\'t match', function (done) {
+            //Relies on implementation details of SyncedFile - can't use a stub
+            collection = new SyncedFileCollection(SyncedFileWithStubbedFileSystem);
+            collection.foundRemote('file1','hash1');
+            collection.foundRemote('file2','hash2');
+            collection.foundFile('file1');
+            collection.globDone();
+            collection.remoteDone();
+            later()(function(){
+                var promise = fileUtilsStub.getContentHash.withArgs('file1').firstCall.returnValue;
+                promise._deferred.resolve('hash1b');
+                return later(); //adds an additional delay
+            }).then(function(){
+                    expect(collection.allDone.isFulfilled()).to.be.true;
+                }).then.notify(done);
+        });
+
+
+
+
+    });
 
 
 });

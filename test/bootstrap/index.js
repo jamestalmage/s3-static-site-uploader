@@ -8,6 +8,7 @@ chai.use(require('sinon-chai'));
 chai.use(require('chai-things'));
 
 var Q = require('Q');
+Q.longStackSupport = true;
 var PromiseEngine = require('promise-testing');
 var engine = new PromiseEngine();
 
@@ -26,12 +27,6 @@ global.requireCov = function(path){
     return require(path);
 };
 
-
-function later(result){
-    return after(0,result);
-}
-
-
 function after(time,result){
     var deferred = Q.defer();
 
@@ -40,6 +35,5 @@ function after(time,result){
     return engine.wrap(deferred.promise).then;
 }
 
-global.later = later;
-global.after = after;
+global.later = after;
 
