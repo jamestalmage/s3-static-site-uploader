@@ -24,9 +24,18 @@ function SyncedFileCollection(SyncedFile){
         }
     }
 
+    function remoteDone(){
+        for(var i in map){
+            if(map.hasOwnProperty(i)){
+                map[i].remoteDone();
+            }
+        }
+    }
+
     this.foundFile = foundFile;
     this.foundRemote = foundRemote;
     this.globDone = globDone;
+    this.remoteDone = remoteDone;
 }
 
 module.exports = SyncedFileCollection;

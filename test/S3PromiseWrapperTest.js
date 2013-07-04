@@ -20,18 +20,6 @@ describe('S3PromiseWrapper', function () {
         engine.patch(wrapper,'checkBucketName');
     });
 
-    function later(result){
-        return after(0,result);
-    }
-
-    function after(time,result){
-        var deferred = Q.defer();
-
-        setTimeout(deferred.resolve.bind(deferred,result),time);
-
-        return engine.wrap(deferred.promise).then;
-    }
-
     describe('checkBucketName', function () {
         it('calls headBucket on s3 with bucketName',function(done){
             wrapper.checkBucketName('myBucket');

@@ -122,6 +122,16 @@ describe('SyncedFileCollection', function () {
         });
     });
 
+    describe('remoteDone',function(){
+        it('should call remoteDone on each SyncedFile created', function () {
+            collection.foundFile('myFile');
+            collection.foundFile('yourFile');
+            collection.remoteDone();
+            expect(fileStub(0).remoteDone).to.have.been.called;
+            expect(fileStub(1).remoteDone).to.have.been.called;
+        });
+    })
+
 
 });
 
