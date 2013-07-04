@@ -55,7 +55,7 @@ describe('SyncedFile', function () {
     }
 
     function expectAction(actionType){
-        return expectThen('action',actionType);
+        return expectThen('action',{'action':actionType,path:'./test/testfile.txt'});
         //return action.then.expect.result.to.equal(actionType);
     }
 

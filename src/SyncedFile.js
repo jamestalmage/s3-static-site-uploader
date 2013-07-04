@@ -33,6 +33,10 @@ function SyncedFile (path,fileUtils,Q){
         upload.resolve({'upload':_upload,path:path});
     }
 
+    function resolveAction(_action){
+        action.resolve({'action':_action,path:path});
+    }
+
     Q.spread([del.promise,remoteHash.promise],function(del,remoteHash){
         var exists = !del.delete;
         if(exists && remoteHash){
@@ -40,11 +44,11 @@ function SyncedFile (path,fileUtils,Q){
                 function(localHash){
                     if(localHash === remoteHash){
                         resolveUpload(false);
-                        action.resolve('nothing');
+                        resolveAction('nothing');
                     }
                     else {
                         resolveUpload(true);
-                        action.resolve('upload');
+                        resolveAction('upload')
                     }
                 },
                 action.reject
@@ -52,11 +56,11 @@ function SyncedFile (path,fileUtils,Q){
         }
         else if(exists){
             resolveUpload(true);
-            action.resolve('upload');
+            resolveAction('upload');
         }
         else if(remoteHash){
             resolveUpload(false);
-            action.resolve('delete');
+            resolveAction('delete');
         }
         else {
             action.reject('This should never happen');
