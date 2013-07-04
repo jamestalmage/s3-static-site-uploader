@@ -60,15 +60,15 @@ describe('SyncedFile', function () {
     }
 
     function expectDelete(val){
-        return expectThen('delete',val);
+        return expectThen('delete',{'delete':val,path:'./test/testfile.txt'});
     }
 
     function expectUpload(val){
-        return expectThen('upload',val);
+        return expectThen('upload',{'upload':val,path:'./test/testfile.txt'});
     }
 
     function expectThen(prop,value){
-        return file[prop].then.expect.result.to.equal(value);
+        return file[prop].then.expect.result.to.eql(value);
     }
 
     it('constructor does not immediately hash the file', function (done) {

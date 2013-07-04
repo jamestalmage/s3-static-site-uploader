@@ -10,11 +10,11 @@ function SyncedFile (path,fileUtils,Q){
     var action = Q.defer();
 
     function foundFile(){
-        del.resolve(false);
+        resolveDelete(false);
     }
 
     function globDone(){
-        del.resolve(true);
+        resolveDelete(true);
     }
 
     function foundRemote(hash){
@@ -25,17 +25,25 @@ function SyncedFile (path,fileUtils,Q){
         remoteHash.resolve(false);
     }
 
+    function resolveDelete(_del){
+        del.resolve({'delete':_del,path:path});
+    }
+
+    function resolveUpload(_upload) {
+        upload.resolve({'upload':_upload,path:path});
+    }
+
     Q.spread([del.promise,remoteHash.promise],function(del,remoteHash){
-        var exists = !del;
+        var exists = !del.delete;
         if(exists && remoteHash){
             fileUtils.getContentHash(path).then(
                 function(localHash){
                     if(localHash === remoteHash){
-                        upload.resolve(false);
+                        resolveUpload(false);
                         action.resolve('nothing');
                     }
                     else {
-                        upload.resolve(true);
+                        resolveUpload(true);
                         action.resolve('upload');
                     }
                 },
@@ -43,11 +51,11 @@ function SyncedFile (path,fileUtils,Q){
             )
         }
         else if(exists){
-            upload.resolve(true);
+            resolveUpload(true);
             action.resolve('upload');
         }
         else if(remoteHash){
-            upload.resolve(false);
+            resolveUpload(false);
             action.resolve('delete');
         }
         else {
