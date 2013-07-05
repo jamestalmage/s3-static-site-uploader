@@ -11,6 +11,12 @@ function SyncedFileCollection(SyncedFile){
         if(!obj){
             obj = map[path] = new SyncedFile(path);
             actions.push(obj.action);
+            if(isGlobDone){
+                obj.globDone();
+            }
+            if(isRemoteDone){
+                obj.remoteDone();
+            }
         }
         return obj;
     }
@@ -28,6 +34,7 @@ function SyncedFileCollection(SyncedFile){
     var isGlobDone = false;
     var isRemoteDone = false;
     var allDone = Q.defer();
+
     function globDone(){
         if(isGlobDone) throw new Error('globDone already called');
         isGlobDone = true;

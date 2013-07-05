@@ -60,6 +60,13 @@ describe('SyncedFileCollection', function () {
             collection.foundFile('myPath');
             expect(fileStub(0).foundFile).to.have.been.calledOnce;
         });
+
+        it('should call remoteDone immediately on all local files found after remote is done',function(){
+            collection.remoteDone();
+            collection.foundFile('myPath');
+            expect(fileStub(0).remoteDone).to.have.been.called;
+
+        });
     });
 
     describe('foundRemote',function(){
@@ -109,6 +116,12 @@ describe('SyncedFileCollection', function () {
             collection.foundRemote('myPath','myHash');
             expect(fileStub(0).foundRemote).to.have.been.calledOnce;
             expect(fileStub(0).foundRemote).to.have.been.calledWith('myHash');
+        });
+
+        it('should call globDone immediately on remote files found after the glob is done',function(){
+            collection.globDone();
+            collection.foundRemote('myPath','myHash');
+            expect(fileStub(0).globDone).to.have.been.called;
         });
     });
 
