@@ -2,6 +2,7 @@ var GlobRunnerStub = require('../test-lib/GlobRunnerStub.js');
 var RemoteRunnerStub = require('../test-lib/RemoteRunnerStub.js');
 var SyncedFileCollectionStub = require('../test-lib/SyncedFileCollectionStub.js');
 var S3PromiseWrapperStub = require('../test-lib/S3PromiseWrapperStub.js');
+var fileUtilsStub = require('../test-lib/file-utils-stub.js');
 var AWSStub = require('../test-lib/AWSStub.js');
 var S3Stub = AWSStub.S3;
 
@@ -22,6 +23,7 @@ describe('ConfigRunner', function () {
         SyncedFileCollectionStub.reset();
         AWSStub.reset();
         S3PromiseWrapperStub.reset();
+        fileUtilsStub.restore();
     });
 
     function createConfig(bucketName,credentials,patterns){
@@ -38,7 +40,7 @@ describe('ConfigRunner', function () {
 
     function createConfigRunner(bucketName,credentials,patterns){
         var config = createConfig.apply(null,arguments);
-        return  new ConfigRunner(config,GlobRunnerStub,RemoteRunnerStub,SyncedFileCollectionStub,S3PromiseWrapperStub,AWSStub);
+        return  new ConfigRunner(config,GlobRunnerStub,RemoteRunnerStub,SyncedFileCollectionStub,S3PromiseWrapperStub,AWSStub,fileUtilsStub);
     }
 
     it('creates a new GlobRunner', function () {
@@ -120,7 +122,126 @@ describe('ConfigRunner', function () {
         expect(AWSStub.config.loadFromPath)
             .to.have.been.calledOnce
             .and.calledWith('./myCredentials.json');
-
     });
 
+    it('will call deleteObjects on s3Wrapper with appropriate bucket',function(done){
+        createConfigRunner();
+        collectionInstance(0).allDoneDefer.resolve([{action:'delete',path:'myDeletePath'}]);
+        later()(function(){
+            expect(s3WrapperInstance(0).deleteObjects)
+                .to.have.been.calledOnce
+                .and.calledWith('myBucket');
+        }).then.notify(done);
+    });
+
+    it('will call deleteObjects on s3Wrapper with some other bucket',function(done){
+        createConfigRunner('myOtherBucket');
+        collectionInstance(0).allDoneDefer.resolve([{action:'delete',path:'myDeletePath'}]);
+        later()(function(){
+            expect(s3WrapperInstance(0).deleteObjects)
+                .to.have.been.calledOnce
+                .and.calledWith('myOtherBucket');
+        }).then.notify(done);
+    });
+
+    it('will call deleteObjects on s3Wrapper with appropriate path',function(done){
+        createConfigRunner();
+        collectionInstance(0).allDoneDefer.resolve([{action:'delete',path:'myDeletePath'}]);
+        later()(function(){
+            expect(s3WrapperInstance(0).deleteObjects)
+                .to.have.been.calledOnce
+                .and.calledWith(match.any,['myDeletePath']);
+        }).then.notify(done);
+    });
+
+    it('will call deleteObjects on s3Wrapper with a different path',function(done){
+        createConfigRunner();
+        collectionInstance(0).allDoneDefer.resolve([{action:'delete',path:'myOtherDeletePath'}]);
+        later()(function(){
+            expect(s3WrapperInstance(0).deleteObjects)
+                .to.have.been.calledOnce
+                .and.calledWith(match.any,['myOtherDeletePath']);
+        }).then.notify(done);
+    });
+
+    it('will call deleteObjects on s3Wrapper with multiple delete paths',function(done){
+        createConfigRunner();
+        collectionInstance(0).allDoneDefer.resolve([{action:'delete',path:'myDeletePath'},{action:'delete',path:'myOtherDeletePath'}]);
+        later()(function(){
+            expect(s3WrapperInstance(0).deleteObjects)
+                .to.have.been.calledOnce
+                .and.calledWith(match.any,['myDeletePath','myOtherDeletePath']);
+        }).then.notify(done);
+    });
+
+    it('will fetch file contents for path with action upload',function(done){
+        createConfigRunner();
+        collectionInstance(0).allDoneDefer.resolve([{action:'upload',path:'myUploadPath'}]);
+        later()(function(){
+            expect(fileUtilsStub.getContents).to.have.been.calledOnce.and.calledWith('myUploadPath');
+        }).then.notify(done);
+    });
+
+    it('will fetch file contents for a different path with action upload',function(done){
+        createConfigRunner();
+        collectionInstance(0).allDoneDefer.resolve([{action:'upload',path:'myOtherUploadPath'}]);
+        later()(function(){
+            expect(fileUtilsStub.getContents).to.have.been.calledOnce.and.calledWith('myOtherUploadPath');
+        }).then.notify(done);
+    });
+
+    it('will fetch file contents for both paths with action upload',function(done){
+        createConfigRunner();
+        collectionInstance(0).allDoneDefer.resolve([{action:'upload',path:'myOtherUploadPath'},{action:'upload',path:'myUploadPath'}]);
+        later()(function(){
+            expect(fileUtilsStub.getContents)
+                .to.have.been.calledTwice
+                .and.calledWith('myOtherUploadPath')
+                .and.calledWith('myUploadPath');
+        }).then.notify(done);
+    });
+
+
+    it('will upload file contents of given path',function(done){
+        createConfigRunner();
+        collectionInstance(0).allDoneDefer.resolve([{action:'upload',path:'myUploadPath'}]);
+        later()(function(){
+            fileUtilsStub.getContents.returnValues[0]._deferred.resolve('myContents');
+            later()(function(){
+                expect(s3WrapperInstance(0).putObject).to.have.been.calledOnce.and.calledWith('myBucket','myUploadPath','myContents');
+
+            }).then.notify(done);
+        });
+    });
+
+
+    it('will upload file contents of a different path',function(done){
+        createConfigRunner();
+        collectionInstance(0).allDoneDefer.resolve([{action:'upload',path:'myOtherUploadPath'}]);
+        later()(function(){
+            fileUtilsStub.getContents.returnValues[0]._deferred.resolve('myOtherContents');
+            later()(function(){
+                expect(s3WrapperInstance(0).putObject).to.have.been.calledOnce.and.calledWith('myBucket','myOtherUploadPath','myOtherContents');
+
+            }).then.notify(done);
+        });
+    });
+
+
+    it('will upload file contents of multiple paths',function(done){
+        createConfigRunner();
+        collectionInstance(0).allDoneDefer.resolve([{action:'upload',path:'myOtherUploadPath'},{action:'upload',path:'myUploadPath'}]);
+        later()(function(){
+            //TODO: To brittle - don't rely on execution order
+            fileUtilsStub.getContents.returnValues[0]._deferred.resolve('myOtherContents');
+            fileUtilsStub.getContents.returnValues[1]._deferred.resolve('myContents');
+            later()(function(){
+                expect(s3WrapperInstance(0).putObject)
+                    .to.have.been.calledTwice
+                    .and.calledWith('myBucket','myOtherUploadPath','myOtherContents')
+                    .and.calledWith('myBucket','myUploadPath','myContents');
+
+            }).then.notify(done);
+        });
+    });
 });
