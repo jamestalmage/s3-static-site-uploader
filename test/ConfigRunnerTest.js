@@ -2,7 +2,8 @@ var GlobRunnerStub = require('../test-lib/GlobRunnerStub.js');
 var RemoteRunnerStub = require('../test-lib/RemoteRunnerStub.js');
 var SyncedFileCollectionStub = require('../test-lib/SyncedFileCollectionStub.js');
 var S3PromiseWrapperStub = require('../test-lib/S3PromiseWrapperStub.js');
-var S3Stub = require('../test-lib/S3Stub.js');
+var AWSStub = require('../test-lib/AWSStub.js');
+var S3Stub = AWSStub.S3;
 
 
 var ConfigRunner = requireCov('../src/ConfigRunner.js');
@@ -12,26 +13,32 @@ var globRunInstance = GlobRunnerStub.instance;
 var remoteRunInstance = RemoteRunnerStub.instance;
 var collectionInstance = SyncedFileCollectionStub.instance;
 var s3Instance = S3Stub.instance;
-var s3WrapperInstane = S3PromiseWrapperStub.instance;
+var s3WrapperInstance = S3PromiseWrapperStub.instance;
 
 describe('ConfigRunner', function () {
     afterEach(function(){
         GlobRunnerStub.reset();
         RemoteRunnerStub.reset();
         SyncedFileCollectionStub.reset();
-        S3Stub.reset();
+        AWSStub.reset();
         S3PromiseWrapperStub.reset();
     });
 
-    function createConfigRunner(bucketName,patterns){
+    function createConfig(bucketName,credentials,patterns){
         bucketName = bucketName || 'myBucket';
-        if(arguments.length < 2) {
+        credentials = credentials || './myCredentials.json';
+        if(arguments.length < 3) {
             patterns = ['json/*.json'];
         }
         else {
-            patterns = Array.prototype.slice.call(arguments,1);
+            patterns = Array.prototype.slice.call(arguments,2);
         }
-        return  new ConfigRunner({bucketName:bucketName,patterns:patterns},GlobRunnerStub,RemoteRunnerStub,SyncedFileCollectionStub,S3PromiseWrapperStub,S3Stub);
+        return {bucketName:bucketName,credentials:credentials,patterns:patterns};
+    }
+
+    function createConfigRunner(bucketName,credentials,patterns){
+        var config = createConfig.apply(null,arguments);
+        return  new ConfigRunner(config,GlobRunnerStub,RemoteRunnerStub,SyncedFileCollectionStub,S3PromiseWrapperStub,AWSStub);
     }
 
     it('creates a new GlobRunner', function () {
@@ -77,7 +84,7 @@ describe('ConfigRunner', function () {
 
     it('passes the S3PromiseWrapper to the RemoteRunner',function(){
         createConfigRunner();
-        expect(RemoteRunnerStub).to.have.been.calledWith(match.any,match.any,s3WrapperInstane(0));
+        expect(RemoteRunnerStub).to.have.been.calledWith(match.any,match.any,s3WrapperInstance(0));
     })
 
     it('passes the SyncedFileCollection to the GlobRunner',function(){
@@ -91,11 +98,29 @@ describe('ConfigRunner', function () {
     });
 
     it('adds multiple config patterns to the globRunner',function (){
-        createConfigRunner(null,'json/*.json','src/*.js');
+        createConfigRunner(null,null,'json/*.json','src/*.js');
         expect(globRunInstance(0).addPattern)
             .to.have.been.calledTwice
             .and.calledWith('json/*.json')
             .and.calledWith('src/*.js');
+    });
+
+    it('calls run on the RemoteRunner',function(){
+        createConfigRunner();
+        expect(remoteRunInstance(0).run).to.have.been.calledOnce;
+    });
+
+    it('calls run on the GlobRunner',function(){
+        createConfigRunner();
+        expect(globRunInstance(0).run).to.have.been.calledOnce;
+    });
+
+    it('loads the credentials file specified in config into aws',function(){
+        createConfigRunner();
+        expect(AWSStub.config.loadFromPath)
+            .to.have.been.calledOnce
+            .and.calledWith('./myCredentials.json');
+
     });
 
 });
