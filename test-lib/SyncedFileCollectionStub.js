@@ -5,4 +5,10 @@ function SyncedFileCollectionStub(){
     this.remoteDone = sinon.spy();
 }
 
-module.exports = SyncedFileCollectionStub;
+var syncedFileSpy = sinon.spy(SyncedFileCollectionStub);
+
+syncedFileSpy.instance = function(index){
+    return syncedFileSpy.thisValues[index];
+} ;
+
+module.exports = syncedFileSpy;

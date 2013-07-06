@@ -5,7 +5,7 @@ test: node_modules
 	 mocha
 
 src-cov: clean-cov
-	jscoverage src src-cov
+	jscover --no-highlight src src-cov
 
 test-cov: src-cov
 	S3_UPLOAD_COV=1 mocha \
