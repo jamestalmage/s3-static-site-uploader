@@ -244,4 +244,38 @@ describe('ConfigRunner', function () {
             }).then.notify(done);
         });
     });
+
+    it('will handle mixed upload / deletes',function(done){
+        createConfigRunner();
+        collectionInstance(0).allDoneDefer.resolve([
+            {action:'delete',path:'myDeletePath'},
+            {action:'upload',path:'myUploadPath'}
+        ]);
+        later()(function(){
+            expect(fileUtilsStub.getContents).to.have.been.calledOnce.and.calledWith('myUploadPath');
+            expect(s3WrapperInstance(0).deleteObjects).to.have.been.calledOnce.and.calledWith('myBucket',['myDeletePath']);
+            fileUtilsStub.getContents.returnValues[0]._deferred.resolve('myContents');
+
+            later()(function(){
+                expect(s3WrapperInstance(0).putObject)
+                    .to.have.been.calledOnce
+                    .to.have.been.calledWith('myBucket','myUploadPath','myContents');
+
+            }).then.notify(done);
+        }).then(null,done);
+
+    });
+
+    it('will not call delete if there are no objects to delete',function(done){
+        createConfigRunner();
+        collectionInstance(0).allDoneDefer.resolve([
+            {action:'upload',path:'myOtherUploadPath'},
+            {action:'upload',path:'myUploadPath'}
+        ]);
+
+        later()(function(){
+            expect(s3WrapperInstance(0).deleteObjects).not.to.have.been.called;
+        }).then.notify(done);
+
+    });
 });

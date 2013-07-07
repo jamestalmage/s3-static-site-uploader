@@ -25,14 +25,18 @@ function ConfigRunner(config,GlobRunner,RemoteRunner,SyncedFileCollection,S3Prom
     collection.allDone.then(function(actions){
         var deletes = [];
         actions.forEach(function(obj){
-            if(obj.action === 'delete'){
-                deletes.push(obj.path);
+            switch(obj.action){
+                case 'delete':
+                    deletes.push(obj.path);
+                    break;
+                case 'upload':
+                    fileUtils.getContents(obj.path).then(function(contents){
+                        s3Wrapper.putObject(config.bucketName,obj.path,contents);
+                    });
+
             }
-            fileUtils.getContents(obj.path).then(function(contents){
-                s3Wrapper.putObject(config.bucketName,obj.path,contents);
-            });
         });
-        s3Wrapper.deleteObjects(config.bucketName,deletes);
+        if(deletes.length !== 0) s3Wrapper.deleteObjects(config.bucketName,deletes);
     });
 }
 
