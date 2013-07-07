@@ -1,4 +1,4 @@
-function ConfigRunner(config,GlobRunner,RemoteRunner,SyncedFileCollection,S3PromiseWrapper,AWS,fileUtils){
+function ConfigRunner(GlobRunner,RemoteRunner,SyncedFileCollection,S3PromiseWrapper,AWS,fileUtils){
     GlobRunner = GlobRunner || require('./GlobRunner.js');
     RemoteRunner = RemoteRunner || require('./RemoteRunner.js');
     SyncedFileCollection = SyncedFileCollection || require('./SyncedFileCollection.js');
@@ -6,48 +6,57 @@ function ConfigRunner(config,GlobRunner,RemoteRunner,SyncedFileCollection,S3Prom
     fileUtils = fileUtils || require('./file-utils.js');
     AWS = AWS || require('aws-sdk');
     var S3 = AWS.S3;
+    var config;
 
+    this.setConfig = function(conf){
+        config = conf;
+        return this;
+    };
 
-    AWS.config.loadFromPath(config.credentials);
+    this.run = function(){
 
-    var s3 = new S3();
-    var s3Wrapper = new S3PromiseWrapper(s3);
+        AWS.config.loadFromPath(config.credentials);
 
-    var collection = new SyncedFileCollection();
-    var globRunner = new GlobRunner(collection);
-    var remoteRunner = new RemoteRunner(config.bucketName,collection,s3Wrapper);
+        var s3 = new S3();
+        var s3Wrapper = new S3PromiseWrapper(s3);
 
-    var patterns = config.patterns;
+        var collection = new SyncedFileCollection();
+        var globRunner = new GlobRunner(collection);
+        var remoteRunner = new RemoteRunner(config.bucketName,collection,s3Wrapper);
 
-    for(var i = 0; i < patterns.length; i ++){
-        globRunner.addPattern(patterns[i]);
-    }
+        var patterns = config.patterns;
 
- //   config.patterns.forEach(globRunner.addPattern);
+        for(var i = 0; i < patterns.length; i ++){
+            globRunner.addPattern(patterns[i]);
+        }
 
-    remoteRunner.run();
-    globRunner.run();
+        //   config.patterns.forEach(globRunner.addPattern);
 
-    collection.allDone.then(function(actions){
-        var deletes = [];
-        actions.forEach(function(obj){
-            switch(obj.action){
-                case 'delete':
-                    deletes.push(obj.path);
-                    break;
-                case 'upload':
-                    fileUtils.getContents(obj.path).then(function(contents){
-                        console.log('uploading: ' + obj.path);
-                        s3Wrapper.putObject(config.bucketName,obj.path,contents).then(function(){
-                            console.log('done uploading: ' + obj.path);
+        remoteRunner.run();
+        globRunner.run();
+
+        collection.allDone.then(function(actions){
+            var deletes = [];
+            actions.forEach(function(obj){
+                switch(obj.action){
+                    case 'delete':
+                        deletes.push(obj.path);
+                        break;
+                    case 'upload':
+                        fileUtils.getContents(obj.path).then(function(contents){
+                            //console.log('uploading: ' + obj.path);
+                            s3Wrapper.putObject(config.bucketName,obj.path,contents).then(function(){
+                                //console.log('done uploading: ' + obj.path);
+                            });
                         });
-                    });
 
 
-            }
+                }
+            });
+            if(deletes.length !== 0) s3Wrapper.deleteObjects(config.bucketName,deletes);
         });
-        if(deletes.length !== 0) s3Wrapper.deleteObjects(config.bucketName,deletes);
-    });
+
+    };
 }
 
 module.exports = ConfigRunner;

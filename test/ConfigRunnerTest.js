@@ -40,7 +40,8 @@ describe('ConfigRunner', function () {
 
     function createConfigRunner(bucketName,credentials,patterns){
         var config = createConfig.apply(null,arguments);
-        return  new ConfigRunner(config,GlobRunnerStub,RemoteRunnerStub,SyncedFileCollectionStub,S3PromiseWrapperStub,AWSStub,fileUtilsStub);
+        var runner = new ConfigRunner(GlobRunnerStub,RemoteRunnerStub,SyncedFileCollectionStub,S3PromiseWrapperStub,AWSStub,fileUtilsStub);
+        runner.setConfig(config).run();
     }
 
     it('creates a new GlobRunner', function () {
