@@ -17,7 +17,13 @@ function ConfigRunner(config,GlobRunner,RemoteRunner,SyncedFileCollection,S3Prom
     var globRunner = new GlobRunner(collection);
     var remoteRunner = new RemoteRunner(config.bucketName,collection,s3Wrapper);
 
-    config.patterns.forEach(globRunner.addPattern);
+    var patterns = config.patterns;
+
+    for(var i = 0; i < patterns.length; i ++){
+        globRunner.addPattern(patterns[i]);
+    }
+
+ //   config.patterns.forEach(globRunner.addPattern);
 
     remoteRunner.run();
     globRunner.run();
@@ -31,8 +37,12 @@ function ConfigRunner(config,GlobRunner,RemoteRunner,SyncedFileCollection,S3Prom
                     break;
                 case 'upload':
                     fileUtils.getContents(obj.path).then(function(contents){
-                        s3Wrapper.putObject(config.bucketName,obj.path,contents);
+                        console.log('uploading: ' + obj.path);
+                        s3Wrapper.putObject(config.bucketName,obj.path,contents).then(function(){
+                            console.log('done uploading: ' + obj.path);
+                        });
                     });
+
 
             }
         });
