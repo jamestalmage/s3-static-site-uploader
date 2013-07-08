@@ -33,7 +33,7 @@ function SyncedFileCollection(SyncedFile){
 
     var isGlobDone = false;
     var isRemoteDone = false;
-    var allDone = Q.defer();
+    var scansDone = Q.defer();
 
     function globDone(){
         if(isGlobDone) throw new Error('globDone already called');
@@ -43,7 +43,7 @@ function SyncedFileCollection(SyncedFile){
                 map[i].globDone();
             }
         }
-        if(isRemoteDone) allDone.resolve();
+        if(isRemoteDone) scansDone.resolve();
     }
 
     function remoteDone(){
@@ -54,7 +54,7 @@ function SyncedFileCollection(SyncedFile){
                 map[i].remoteDone();
             }
         }
-        if(isGlobDone) allDone.resolve();
+        if(isGlobDone) scansDone.resolve();
     }
 
 
@@ -63,7 +63,7 @@ function SyncedFileCollection(SyncedFile){
     this.globDone = globDone;
     this.remoteDone = remoteDone;
 
-    this.allDone = allDone.promise.then(function(){
+    this.allDone = scansDone.promise.then(function(){
         return Q.all(actions);
     });
 
