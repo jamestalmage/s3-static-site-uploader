@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 var ConfigRunner = require('../src/ConfigRunner.js');
 var path = require('path');
 
