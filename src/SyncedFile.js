@@ -51,7 +51,11 @@ function SyncedFile (path,fileUtils,Q){
                         resolveAction('upload')
                     }
                 },
-                action.reject
+                function(reason){
+                    console.log(reason);
+                    action.reject(reason);
+                    throw reason;
+                }
             )
         }
         else if(exists){
@@ -63,10 +67,11 @@ function SyncedFile (path,fileUtils,Q){
             resolveAction('delete');
         }
         else {
+            console.log('THIS SHOULD NEVER HAPPEN - SyncedFile in impossible state');
             action.reject('This should never happen');
             throw new Error('this should never happen!');
         }
-    });
+    }).done();
 
     this.foundFile = foundFile;
     this.foundRemote = foundRemote;
