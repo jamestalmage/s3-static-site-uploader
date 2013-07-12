@@ -2,8 +2,41 @@ var Q = require('Q');
 
 var fs = require('fs');
 var crypto = require('crypto');
+var MAX_OPEN = 250;
+var openCount = 0;
+var cache = [];
 
-var readFile = Q.denodeify(fs.readFile);
+function _readNextFile(){
+    if(openCount < MAX_OPEN && cache.length > 0){
+        openCount++;
+        var nextCall = cache[0];
+        cache = cache.slice(1);
+
+
+        fs.readFile(nextCall.fileName,nextCall.options,function(err,result){
+            try {
+                if(err){
+                    nextCall.deferred.reject(err);
+                }
+                else {
+                    nextCall.deferred.resolve(result);
+                }
+            }
+            finally {
+                openCount--;
+                _readNextFile();
+            }
+        });
+    }
+}
+
+function readFile(fileName,opts){
+    var deferred = Q.defer();
+    cache.push({fileName:fileName, options:opts,deferred:deferred});
+    _readNextFile();
+    return deferred.promise;
+}
+
 
 function isArray(path) {
     return Object.prototype.toString.call(path) === '[object Array]';
@@ -54,8 +87,11 @@ function exists(path){
 
 
 module.exports = {
+    _fs:fs,
     md5:md5,
     getContents: getFileContents,
     getContentHash: getContentHash,
-    exists:exists
+    exists:exists,
+    get MAX_OPEN(){return MAX_OPEN;},
+    set MAX_OPEN(mo){MAX_OPEN = mo;}
 };
