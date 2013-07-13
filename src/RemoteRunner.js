@@ -14,7 +14,7 @@ function RemoteRunner(bucketName,collection,s3){
                 collection.foundRemote(key,tag);
             });
             collection.remoteDone();
-        });
+        },console.log);
     }
 
     this.run = run;
