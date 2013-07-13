@@ -93,5 +93,5 @@ module.exports = {
     getContentHash: getContentHash,
     exists:exists,
     get MAX_OPEN(){return MAX_OPEN;},
-    set MAX_OPEN(mo){MAX_OPEN = mo;}
+    set MAX_OPEN(mo){MAX_OPEN = mo; _readNextFile();}
 };

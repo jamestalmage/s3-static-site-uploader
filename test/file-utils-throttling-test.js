@@ -96,4 +96,65 @@ describe('file utils throttling', function () {
             .then.notify(done);
     });
 
+    it('reducing MAX_OPEN will prevent further reads until openCount is sufficiently reduced',function(done){
+
+        fileUtils.MAX_OPEN = 3;
+        var c1 = fileUtils.getContents('test1.txt').then.expect.result.to.equal('Contents1');
+        var c2 = fileUtils.getContents('test2.txt').then.expect.result.to.equal('Contents2');
+        var c3 = fileUtils.getContents('test3.txt').then.expect.result.to.equal('Contents3');
+        var c4 = fileUtils.getContents('test4.txt').then.expect.result.to.equal('Contents4');
+
+        later().then.
+            expect(fs.readFile).to.have.been.calledThrice
+            .then(function(){
+                fileUtils.MAX_OPEN = 2;
+                readSuccess(0,'Contents1');
+            })
+            .then.expect(fs.readFile).to.have.been.calledThrice
+            .then(function(){
+                fileUtils.MAX_OPEN = 1;
+                readSuccess(1,'Contents2');
+            })
+            .then.expect(fs.readFile).to.have.been.calledThrice
+            .then(function(){
+                readSuccess(2,'Contents3');
+            })
+            .then(function(){
+                expect(fs.readFile.callCount).to.equal(4);
+                readSuccess(3,'Contents4');
+                return Q.all([c1,c2,c3,c4])
+            })
+            .then.notify(done);
+    });
+
+
+    it('reducing MAX_OPEN will prevent further reads until openCount is sufficiently reduced',function(done){
+
+        fileUtils.MAX_OPEN = 2;
+        var c1 = fileUtils.getContents('test1.txt').then.expect.result.to.equal('Contents1');
+        var c2 = fileUtils.getContents('test2.txt').then.expect.result.to.equal('Contents2');
+        var c3 = fileUtils.getContents('test3.txt').then.expect.result.to.equal('Contents3');
+        var c4 = fileUtils.getContents('test4.txt').then.expect.result.to.equal('Contents4');
+
+        later().then.
+            expect(fs.readFile).to.have.been.calledTwice
+            .then(function(){
+                fileUtils.MAX_OPEN = 3;
+            })
+            .then.expect(fs.readFile).to.have.been.calledThrice
+            .then(function(){
+                fileUtils.MAX_OPEN = 4;
+            })
+            .then(function(){
+                expect(fs.readFile.callCount).to.equal(4);
+                readSuccess(0,'Contents1');
+                readSuccess(1,'Contents2');
+                readSuccess(2,'Contents3');
+                readSuccess(3,'Contents4');
+                return Q.all([c1,c2,c3,c4])
+            })
+            .then.notify(done);
+    });
+
+
 });
