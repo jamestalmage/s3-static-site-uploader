@@ -7,7 +7,9 @@ var AWSStub = require('../test-lib/AWSStub.js');
 var S3Stub = AWSStub.S3;
 
 
-var ConfigRunner = requireCov('../src/ConfigRunner.js');
+var ConfigRunner = requireCov('../src/ConfigRunner.js').TestHook(
+    GlobRunnerStub,RemoteRunnerStub,SyncedFileCollectionStub,S3PromiseWrapperStub,AWSStub,fileUtilsStub
+);
 
 
 var globRunInstance = GlobRunnerStub.instance;
@@ -40,7 +42,7 @@ describe('ConfigRunner', function () {
 
     function createConfigRunner(bucketName,credentials,patterns){
         var config = createConfig.apply(null,arguments);
-        var runner = new ConfigRunner(GlobRunnerStub,RemoteRunnerStub,SyncedFileCollectionStub,S3PromiseWrapperStub,AWSStub,fileUtilsStub);
+        var runner = new ConfigRunner();
         runner.setConfig(config).run();
     }
 

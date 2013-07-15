@@ -1,5 +1,8 @@
-var Q = require('Q');
-var paramBuilder = require('./S3ParameterBuilder.js')
+function TestHook(Q, paramBuilder){
+    Q = Q || require('Q');
+
+    paramBuilder = paramBuilder || require('./S3ParameterBuilder.js')
+
 
 
 function S3PromiseWrapper(s3Instance){
@@ -57,5 +60,11 @@ for(var i in paramBuilder){
         addParameterFunction(i);
     }
 }
+return S3PromiseWrapper;
+
+}
+
+var S3PromiseWrapper = TestHook();
+S3PromiseWrapper.TestHook = TestHook;
 
 module.exports = S3PromiseWrapper;

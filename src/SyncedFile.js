@@ -1,8 +1,8 @@
-//var fileUtils = require('./file-utils.js');
+function TestHook(fileUtils,Q){
+fileUtils = fileUtils || require( './file-utils.js');
+Q = Q || require('Q');
 
-function SyncedFile (path,fileUtils,Q){
-    fileUtils = fileUtils || require( './file-utils.js');
-    Q = Q || require('Q');
+return function SyncedFile (path){
 
     var del = Q.defer();
     var upload = Q.defer();
@@ -80,6 +80,10 @@ function SyncedFile (path,fileUtils,Q){
     this.action = action.promise;
     this.delete = del.promise;
     this.upload = upload.promise;
+};
 }
+
+var SyncedFile = TestHook();
+SyncedFile.TestHook = TestHook;
 
 module.exports = SyncedFile;

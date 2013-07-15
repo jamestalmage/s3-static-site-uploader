@@ -1,8 +1,8 @@
-var Q = require('Q');
-
-
-function GlobRunner(/*SyncedFileCollection*/ collection,Glob){
+function TestHook(Glob,Q){
     Glob = Glob || require('glob').Glob;
+    Q = Q || require('Q');
+
+return function GlobRunner(/*SyncedFileCollection*/ collection){
     var patterns = [];
     var globs = [];
 
@@ -57,5 +57,9 @@ function GlobRunner(/*SyncedFileCollection*/ collection,Glob){
     this.addPattern = addPattern;
     this.getPatterns = patterns.slice.bind(patterns);
 }
+}
+
+var GlobRunner = TestHook();
+GlobRunner.TestHook = TestHook;
 
 module.exports = GlobRunner;

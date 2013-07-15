@@ -1,7 +1,8 @@
-var Q= require('Q');
+function TestHook(SyncedFile,Q)   {
+SyncedFile = SyncedFile || require('./SyncedFile.js');
+Q = Q || require('Q');
 
-function SyncedFileCollection(SyncedFile){
-    SyncedFile = SyncedFile || require('./SyncedFile.js');
+return function SyncedFileCollection(){
 
     var map = {};
     var actions = [];
@@ -67,8 +68,10 @@ function SyncedFileCollection(SyncedFile){
         return Q.all(actions);
     });
 
-
-
+};
 }
+
+var SyncedFileCollection = TestHook();
+SyncedFileCollection.TestHook = TestHook;
 
 module.exports = SyncedFileCollection;

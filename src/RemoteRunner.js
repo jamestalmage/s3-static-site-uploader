@@ -3,7 +3,6 @@
 var strip = /^"|"$/g;
 
 function RemoteRunner(bucketName,collection,s3){
-    s3 = s3 || require('./S3PromiseWrapper.js');
 
     function run(){
         s3.listObjects(bucketName).then(function(result){

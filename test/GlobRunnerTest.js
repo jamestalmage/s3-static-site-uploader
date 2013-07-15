@@ -1,8 +1,10 @@
-var GlobRunner = requireCov('../src/GlobRunner.js');
+var GlobStub = sinon.spy(require('../test-lib/GlobStub.js'));
+var CollectionStub = sinon.spy(require('./../test-lib/SyncedFileCollectionStub.js'));
+var GlobRunner = requireCov('../src/GlobRunner.js').TestHook(GlobStub);
 
 describe('GlobRunner', function () {
 
-    var globRunner,patterns,GlobStub,glob,CollectionStub,collection;
+    var globRunner,patterns,glob,collection;
 
     function new_GlobRunner(){
         //constructor injection of stubs
@@ -15,8 +17,8 @@ describe('GlobRunner', function () {
     }
 
     beforeEach(function(){
-        GlobStub = sinon.spy(require('./../test-lib/GlobStub.js'));
-        CollectionStub = sinon.spy(require('./../test-lib/SyncedFileCollectionStub.js'));
+        GlobStub.reset();// = sinon.spy(require('./../test-lib/GlobStub.js'));
+        CollectionStub.reset();// = sinon.spy(require('./../test-lib/SyncedFileCollectionStub.js'));
         expect(GlobStub).not.to.have.been.called; //proof counter has been reset.
         expect(CollectionStub).not.to.have.been.called; //proof counter has been reset.
 

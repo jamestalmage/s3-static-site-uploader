@@ -1,6 +1,6 @@
 var Q = require('Q');
-var SyncedFile = requireCov('../src/SyncedFile.js');
 var fileUtils = requireCov('../src/file-utils.js');
+var SyncedFile = requireCov('../src/SyncedFile.js').TestHook(fileUtils,Q);
 
 describe('SyncedFile', function () {
     var sandbox,fileName;
@@ -30,7 +30,7 @@ describe('SyncedFile', function () {
     var file, action;
     beforeEach(function(){
         fileName = './test/testfile.txt';
-        file = new SyncedFile(fileName,fileUtils);
+        file = new SyncedFile(fileName);
         action = file.action = engine.wrap(file.action);
         file.delete = engine.wrap(file.delete);
         file.upload = engine.wrap(file.upload);

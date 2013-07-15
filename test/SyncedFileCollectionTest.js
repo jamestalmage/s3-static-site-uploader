@@ -1,13 +1,15 @@
-var SyncedFileCollection = requireCov('../src/SyncedFileCollection.js');
+var SyncedFileStub = sinon.spy(require('./../test-lib/SyncedFileStub.js'));
+var OriginalSyncedFileCollection = requireCov('../src/SyncedFileCollection.js');
+var SyncedFileCollection = OriginalSyncedFileCollection.TestHook(SyncedFileStub);
 
 describe('SyncedFileCollection', function () {
 
-    var SyncedFileStub, collection;
+    var  collection;
 
     beforeEach(function(){
-        SyncedFileStub = sinon.spy(require('./../test-lib/SyncedFileStub.js'));
+        SyncedFileStub.reset();// = sinon.spy(require('./../test-lib/SyncedFileStub.js'));
         expect(SyncedFileStub).not.to.have.been.called; // proof the call count has been reset
-        collection = new SyncedFileCollection(SyncedFileStub);
+        collection = new SyncedFileCollection();
     });
 
     function fileStub(index){
@@ -171,7 +173,7 @@ describe('SyncedFileCollection', function () {
 
         it('is fulfilled once glob and remote are done, and only local files were found', function (done) {
             //Relies on implementation details of SyncedFile - can't use a stub
-            collection = new SyncedFileCollection();
+            collection = new OriginalSyncedFileCollection();
             collection.foundFile('file1');
             collection.foundFile('file2');
             collection.globDone();
@@ -183,7 +185,7 @@ describe('SyncedFileCollection', function () {
 
         it('is fulfilled once glob and remote are done, and only remote files were found', function (done) {
             //Relies on implementation details of SyncedFile - can't use a stub
-            collection = new SyncedFileCollection();
+            collection = new OriginalSyncedFileCollection();
             collection.foundRemote('file1','hash1');
             collection.foundRemote('file2','hash2');
             collection.globDone();
@@ -198,15 +200,13 @@ describe('SyncedFileCollection', function () {
             fileUtilsStub.restore();
         });
 
-        var SyncedFile = requireCov('../src/SyncedFile');
+        var SyncedFileWithStubbedFileSystem = requireCov('../src/SyncedFile').TestHook(fileUtilsStub);
+        var SyncedFileCollectionWithStubbedFileSystem = OriginalSyncedFileCollection.TestHook(SyncedFileWithStubbedFileSystem);
 
-        function SyncedFileWithStubbedFileSystem(fileName){
-            return new SyncedFile(fileName,fileUtilsStub);
-        }
 
         it('is fulfilled once glob and remote are done, and all found files matched', function (done) {
             //Relies on implementation details of SyncedFile - can't use a stub
-            collection = new SyncedFileCollection(SyncedFileWithStubbedFileSystem);
+            collection = new SyncedFileCollectionWithStubbedFileSystem();
             collection.foundRemote('file1','hash1');
             collection.foundRemote('file2','hash2');
             collection.foundFile('file1');
@@ -224,7 +224,7 @@ describe('SyncedFileCollection', function () {
 
         it('is fulfilled once glob and remote are done, and all found files don\'t match', function (done) {
             //Relies on implementation details of SyncedFile - can't use a stub
-            collection = new SyncedFileCollection(SyncedFileWithStubbedFileSystem);
+            collection = new SyncedFileCollectionWithStubbedFileSystem();
             collection.foundRemote('file1','hash1');
             collection.foundRemote('file2','hash2');
             collection.foundFile('file1');

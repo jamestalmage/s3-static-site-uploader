@@ -1,11 +1,13 @@
-function ConfigRunner(GlobRunner,RemoteRunner,SyncedFileCollection,S3PromiseWrapper,AWS,fileUtils){
-    GlobRunner = GlobRunner || require('./GlobRunner.js');
-    RemoteRunner = RemoteRunner || require('./RemoteRunner.js');
-    SyncedFileCollection = SyncedFileCollection || require('./SyncedFileCollection.js');
-    S3PromiseWrapper = S3PromiseWrapper || require('./S3PromiseWrapper.js');
-    fileUtils = fileUtils || require('./file-utils.js');
-    AWS = AWS || require('aws-sdk');
-    var S3 = AWS.S3;
+function TestHook(GlobRunner,RemoteRunner,SyncedFileCollection,S3PromiseWrapper,AWS,fileUtils){
+GlobRunner = GlobRunner || require('./GlobRunner.js');
+RemoteRunner = RemoteRunner || require('./RemoteRunner.js');
+SyncedFileCollection = SyncedFileCollection || require('./SyncedFileCollection.js');
+S3PromiseWrapper = S3PromiseWrapper || require('./S3PromiseWrapper.js');
+fileUtils = fileUtils || require('./file-utils.js');
+AWS = AWS || require('aws-sdk');
+var S3 = AWS.S3;
+
+return function ConfigRunner(){
     var config;
 
     this.setConfig = function(conf){
@@ -57,6 +59,10 @@ function ConfigRunner(GlobRunner,RemoteRunner,SyncedFileCollection,S3PromiseWrap
         });
 
     };
+};
 }
+
+var ConfigRunner = TestHook();
+ConfigRunner.TestHook = TestHook;
 
 module.exports = ConfigRunner;
