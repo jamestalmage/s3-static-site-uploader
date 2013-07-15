@@ -2,7 +2,7 @@ var Q = require('Q');
 
 var fs = require('fs');
 var crypto = require('crypto');
-var MAX_OPEN = 250;
+var MAX_OPEN = 200;
 var openCount = 0;
 var cache = [];
 
