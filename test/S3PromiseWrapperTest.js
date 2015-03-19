@@ -1,6 +1,6 @@
 var S3Stub = require('./../test-lib/S3Stub.js');
 var S3PromiseWrapper = requireCov('../src/S3PromiseWrapper.js');
-var Q = require('Q');
+var Q = require('q');
 
 engine.use(function(props,handlers){
     props.addProperty('firstCall',handlers.echoHandler);

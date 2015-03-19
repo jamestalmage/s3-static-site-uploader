@@ -1,6 +1,6 @@
 function TestHook(Glob,Q){
     Glob = Glob || require('glob').Glob;
-    Q = Q || require('Q');
+    Q = Q || require('q');
 
 return function GlobRunner(/*SyncedFileCollection*/ collection){
     var patterns = [];

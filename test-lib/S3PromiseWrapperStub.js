@@ -12,7 +12,7 @@ function S3PromiseWrapperStub(){
         'deleteObjects'
     ].forEach(function(fn){
             thisStub[fn] = sinon.spy(function (){
-                var defer = require('Q').defer();
+                var defer = require('q').defer();
                 defer.promise._defer = defer;
                 return defer.promise;
             });

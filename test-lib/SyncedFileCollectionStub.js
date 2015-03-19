@@ -1,4 +1,4 @@
-var Q = require('Q');
+var Q = require('q');
 
 function SyncedFileCollectionStub(){
     this.foundFile = sinon.spy();

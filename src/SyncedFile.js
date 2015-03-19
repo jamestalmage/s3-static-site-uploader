@@ -1,6 +1,6 @@
 function TestHook(fileUtils,Q){
 fileUtils = fileUtils || require( './file-utils.js');
-Q = Q || require('Q');
+Q = Q || require('q');
 
 return function SyncedFile (path){
 

@@ -1,4 +1,4 @@
-var Q = require('Q');
+var Q = require('q');
 var fileUtils = requireCov('../src/file-utils.js');
 var SyncedFile = requireCov('../src/SyncedFile.js').TestHook(fileUtils,Q);
 
