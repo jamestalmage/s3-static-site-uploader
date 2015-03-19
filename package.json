@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "description": "Allows you to upload static files to S3 buckets.",
   "main": "main.js",
-  "bin":{
-    "s3-upload" : "./bin/s3-upload.js"
+  "bin": {
+    "s3-upload": "./bin/s3-upload.js"
   },
   "scripts": {
     "test": "make test"
@@ -26,17 +26,17 @@
     "url": "https://github.com/jamestalmage/s3-static-site-uploader/issues"
   },
   "dependencies": {
-    "aws-sdk": "~1.3.1",
-    "q": "~0.9.6",
+    "aws-sdk": "^2.1.17",
     "crypto": "0.0.3",
+    "glob": "~3.2.1",
     "mime": "~1.2.9",
-    "glob": "~3.2.1"
+    "q": "~0.9.6"
   },
   "devDependencies": {
-    "sinon-chai": "~2.4.0",
     "chai": "~1.7.1",
+    "chai-things": "~0.2.0",
+    "promise-testing": "0.0.12",
     "sinon": "~1.7.3",
-    "promise-testing": "git+ssh://git@git.jrtechnical.com:promise-testing",
-    "chai-things": "~0.2.0"
+    "sinon-chai": "~2.4.0"
   }
 }

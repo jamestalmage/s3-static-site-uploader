@@ -9,12 +9,12 @@ chai.use(require('chai-things'));
 
 var Q = require('Q');
 Q.longStackSupport = true;
-var PromiseEngine = require('promise-testing');
+var PromiseEngine = require('promise-testing/index.js');
 var engine = new PromiseEngine();
 
 var chaiFlavor = require('promise-testing/lib/chai-flavor');
 
-engine.use(chaiFlavor(chai));
+engine.scanChai(chai);
 
 global.engine = engine;
 global.requireCov = function(path){
