@@ -1,6 +1,6 @@
 {
   "name": "s3-upload",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Allows you to upload static files to S3 buckets.",
   "main": "main.js",
   "bin": {
