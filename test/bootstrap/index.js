@@ -7,7 +7,7 @@ chai.use(require('../../test-lib/BufferHelper.js'));
 chai.use(require('sinon-chai'));
 chai.use(require('chai-things'));
 
-var Q = require('Q');
+var Q = require('q');
 Q.longStackSupport = true;
 var PromiseEngine = require('promise-testing/index.js');
 var engine = new PromiseEngine();

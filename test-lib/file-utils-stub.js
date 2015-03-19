@@ -1,5 +1,5 @@
 
-var Q = require('Q');
+var Q = require('q');
 
 var sandbox = sinon.sandbox.create();
 function promiseStub(){

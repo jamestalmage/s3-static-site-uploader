@@ -1,6 +1,6 @@
 function TestHook(SyncedFile,Q)   {
 SyncedFile = SyncedFile || require('./SyncedFile.js');
-Q = Q || require('Q');
+Q = Q || require('q');
 
 return function SyncedFileCollection(){
 

@@ -1,5 +1,5 @@
 function TestHook(Q, paramBuilder){
-    Q = Q || require('Q');
+    Q = Q || require('q');
 
     paramBuilder = paramBuilder || require('./S3ParameterBuilder.js')
 
