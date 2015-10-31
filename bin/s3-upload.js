@@ -5,9 +5,9 @@ var path = require('path');
 var runner = new ConfigRunner();
 
 
-var configPath = path.resolve('./aws-upload.conf.js');
+var configPath = process.argv[2] || './aws-upload.conf.js';
 
-var config = require(configPath);
+var config = require(path.resolve(configPath));
 
 runner.setConfig(config);
 
