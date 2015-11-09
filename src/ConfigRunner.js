@@ -23,7 +23,7 @@ return function ConfigRunner(){
         var s3Wrapper = new S3PromiseWrapper(s3);
 
         var collection = new SyncedFileCollection();
-        var globRunner = new GlobRunner(collection);
+        var globRunner = new GlobRunner(collection, {cwd: config.directory});
         var remoteRunner = new RemoteRunner(config.bucketName,collection,s3Wrapper);
 
         var patterns = config.patterns;
@@ -46,7 +46,8 @@ return function ConfigRunner(){
                         deletes.push(obj.path);
                         break;
                     case 'upload':
-                        fileUtils.getContents(obj.path).then(function(contents){
+                        var path = config.directory ? config.directory + '/' + obj.path : ojb.path;
+                        fileUtils.getContents(path).then(function(contents){
                             console.log('uploading: ' + obj.path);
                             s3Wrapper.putObject(config.bucketName,obj.path,contents).then(function(){
                                 console.log('done uploading: ' + obj.path);
