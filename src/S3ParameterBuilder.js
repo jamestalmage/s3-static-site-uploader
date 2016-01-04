@@ -25,6 +25,7 @@ var createParams = {
         };
     },
     putObject:function(bucketName, key, body, mimeType){
+        mime.default_type = 'text/html';
         mimeType = mimeType || mime.lookup(key);
 
         // console.log(body);
