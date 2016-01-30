@@ -17,7 +17,7 @@ return function ConfigRunner(){
 
     this.run = function(){
 
-        AWS.config.loadFromPath(config.credentials);
+        config.credentials && AWS.config.loadFromPath(config.credentials);
 
         var s3 = new S3();
         var s3Wrapper = new S3PromiseWrapper(s3);
