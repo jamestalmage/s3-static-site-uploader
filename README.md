@@ -90,6 +90,8 @@ Have AWS create a new key pair for the user and copy the contents into a `aws-cr
 }
 ```
 
+**note**: As AWS SDK's documentation points out, you could also set those as `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables 
+
 User Permissions
 ----------------
 
