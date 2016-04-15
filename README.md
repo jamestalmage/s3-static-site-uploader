@@ -9,6 +9,7 @@ Deploy static sites to Amazon S3 using Node!
 module.exports = {
 	credentials:"aws-credentials.json",
 	bucketName:"example.com",
+	source:"dist",
 	patterns:[
 		"scripts/*.js",
 		"stylesheets/default.css",

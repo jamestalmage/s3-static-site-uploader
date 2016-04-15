@@ -1,16 +1,19 @@
 function TestHook(SyncedFile,Q)   {
 SyncedFile = SyncedFile || require('./SyncedFile.js');
 Q = Q || require('q');
+Path = require('path');
 
-return function SyncedFileCollection(){
+return function SyncedFileCollection(source){
 
     var map = {};
     var actions = [];
 
+    var cwd = Path.resolve(process.cwd(), source);
+
     function get(path){
         var obj = map[path];
         if(!obj){
-            obj = map[path] = new SyncedFile(path);
+            obj = map[path] = new SyncedFile(path, cwd);
             actions.push(obj.action);
             if(isGlobDone){
                 obj.globDone();
@@ -58,6 +61,7 @@ return function SyncedFileCollection(){
         if(isGlobDone) scansDone.resolve();
     }
 
+    this.cwd = cwd;
 
     this.foundFile = foundFile;
     this.foundRemote = foundRemote;

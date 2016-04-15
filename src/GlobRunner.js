@@ -33,7 +33,7 @@ return function GlobRunner(/*SyncedFileCollection*/ collection){
     var globsDone=[];
 
     function createGlob(pattern){
-        var glob =  new Glob(pattern);
+        var glob =  new Glob(pattern, {cwd: collection.cwd});
         globs.push(glob);
 
         glob.on('match',onMatch);
