@@ -2,7 +2,7 @@
 
 var strip = /^"|"$/g;
 
-function RemoteRunner(bucketName,collection,s3){
+function RemoteRunner(bucketName,collection,s3,filter){
 
     function run(){
         s3.listObjects(bucketName).then(function(result){
@@ -10,6 +10,7 @@ function RemoteRunner(bucketName,collection,s3){
                 var key = content.Key;
                 var tag = content.ETag;
                 tag = tag.replace(strip,'');
+                if(filter.match(key)) return;
                 collection.foundRemote(key,tag);
             });
             collection.remoteDone();
