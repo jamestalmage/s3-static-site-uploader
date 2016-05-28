@@ -35,7 +35,7 @@ return function ConfigRunner(){
         }
         //   config.patterns.forEach(globRunner.addPattern);
 
-        var excludes = config.excludes || [];
+        var excludes = config.ignore || [];
 
         for(var i = 0; i < excludes.length; i++){
             filter.addPattern(excludes[i]);
