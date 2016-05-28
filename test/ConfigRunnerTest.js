@@ -1,5 +1,6 @@
 var GlobRunnerStub = require('../test-lib/GlobRunnerStub.js');
 var RemoteRunnerStub = require('../test-lib/RemoteRunnerStub.js');
+var ExcludeFilter = require('../src/ExcludeFilter.js');;
 var SyncedFileCollectionStub = require('../test-lib/SyncedFileCollectionStub.js');
 var S3PromiseWrapperStub = require('../test-lib/S3PromiseWrapperStub.js');
 var fileUtilsStub = require('../test-lib/file-utils-stub.js');
@@ -8,7 +9,7 @@ var S3Stub = AWSStub.S3;
 
 
 var ConfigRunner = requireCov('../src/ConfigRunner.js').TestHook(
-    GlobRunnerStub,RemoteRunnerStub,SyncedFileCollectionStub,S3PromiseWrapperStub,AWSStub,fileUtilsStub
+    GlobRunnerStub,RemoteRunnerStub,ExcludeFilter,SyncedFileCollectionStub,S3PromiseWrapperStub,AWSStub,fileUtilsStub
 );
 
 

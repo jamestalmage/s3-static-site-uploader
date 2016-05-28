@@ -1,6 +1,7 @@
-function TestHook(GlobRunner,RemoteRunner,SyncedFileCollection,S3PromiseWrapper,AWS,fileUtils){
+function TestHook(GlobRunner,RemoteRunner,ExcludeFilter,SyncedFileCollection,S3PromiseWrapper,AWS,fileUtils){
 GlobRunner = GlobRunner || require('./GlobRunner.js');
 RemoteRunner = RemoteRunner || require('./RemoteRunner.js');
+ExcludeFilter = ExcludeFilter || require('./ExcludeFilter.js');
 SyncedFileCollection = SyncedFileCollection || require('./SyncedFileCollection.js');
 S3PromiseWrapper = S3PromiseWrapper || require('./S3PromiseWrapper.js');
 fileUtils = fileUtils || require('./file-utils.js');
@@ -23,16 +24,22 @@ return function ConfigRunner(){
         var s3Wrapper = new S3PromiseWrapper(s3);
 
         var collection = new SyncedFileCollection();
-        var globRunner = new GlobRunner(collection);
-        var remoteRunner = new RemoteRunner(config.bucketName,collection,s3Wrapper);
+        var filter = new ExcludeFilter();
+        var globRunner = new GlobRunner(collection,filter);
+        var remoteRunner = new RemoteRunner(config.bucketName,collection,s3Wrapper,filter);
 
         var patterns = config.patterns;
 
         for(var i = 0; i < patterns.length; i ++){
             globRunner.addPattern(patterns[i]);
         }
-
         //   config.patterns.forEach(globRunner.addPattern);
+
+        var excludes = config.excludes || [];
+
+        for(var i = 0; i < excludes.length; i++){
+            filter.addPattern(excludes[i]);
+        }
 
         remoteRunner.run();
         globRunner.run();
