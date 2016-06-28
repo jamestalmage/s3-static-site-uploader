@@ -48,7 +48,7 @@ return function ConfigRunner(){
                     case 'upload':
                         fileUtils.getContents(obj.path).then(function(contents){
                             console.log('uploading: ' + obj.path);
-                            s3Wrapper.putObject(config.bucketName,obj.path,contents).then(function(){
+                            s3Wrapper.putObject(config.bucketName,obj.path,contents,null,config.cacheControl).then(function(){
                                 console.log('done uploading: ' + obj.path);
                             },function(reason){
                                 console.log('error uploading: ' + obj.path);

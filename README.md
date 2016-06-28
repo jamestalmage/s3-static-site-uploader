@@ -121,7 +121,7 @@ From the [AWS IAM Users Console](https://console.aws.amazon.com/iam/?#users) sel
 Create Config
 =============
 
-Create a file called `aws-upload.conf.js` in the root directory of your project and copy and paste in the code below. Modify `bucketName` and the `patterns` array as appropriate for your project. All patterns are evaluated with the current directory as root, and the bucket directory structure will mirror the local one.
+Create a file called `aws-upload.conf.js` in the root directory of your project and copy and paste in the code below. Modify `bucketName` and the `patterns` array as appropriate for your project. All patterns are evaluated with the current directory as root, and the bucket directory structure will mirror the local one. Using `cacheControl` is optional and if set the metadata will be applied to all files uploaded.
 
 ```javascript
 module.exports = {
@@ -132,7 +132,8 @@ module.exports = {
 		"stylesheets/default.css",
 		"images/**/*.jpg",
 		"index.html"
-	]
+	],
+  cacheControl:"max-age=86400"
 }
 ```
 

@@ -28,7 +28,7 @@ describe('ConfigRunner', function () {
         fileUtilsStub.restore();
     });
 
-    function createConfig(bucketName,credentials,patterns){
+    function createConfig(bucketName,credentials,patterns,cacheControl){
         bucketName = bucketName || 'myBucket';
         credentials = credentials || './myCredentials.json';
         if(arguments.length < 3) {
@@ -37,10 +37,15 @@ describe('ConfigRunner', function () {
         else {
             patterns = Array.prototype.slice.call(arguments,2);
         }
-        return {bucketName:bucketName,credentials:credentials,patterns:patterns};
+        config = {bucketName:bucketName,credentials:credentials,patterns:patterns};
+
+        if(arguments.length >= 4) {
+            config.cacheControl = cacheControl;
+        }
+        return config;
     }
 
-    function createConfigRunner(bucketName,credentials,patterns){
+    function createConfigRunner(bucketName,credentials,patterns,cacheControl){
         var config = createConfig.apply(null,arguments);
         var runner = new ConfigRunner();
         runner.setConfig(config).run();
@@ -247,6 +252,20 @@ describe('ConfigRunner', function () {
             }).then.notify(done);
         });
     });
+
+
+    it('will upload file contents of given path with CacheControl',function(done){
+        createConfigRunner(null,null,null,'max-age=86400');
+        collectionInstance(0).allDoneDefer.resolve([{action:'upload',path:'myOtherUploadPath'}]);
+        later()(function(){
+            fileUtilsStub.getContents.returnValues[0]._deferred.resolve('myOtherContents');
+            later()(function(){
+                expect(s3WrapperInstance(0).putObject).to.have.been.calledOnce.and.calledWith('myBucket','myOtherUploadPath','myOtherContents','max-age=86400');
+
+            }).then.notify(done);
+        });
+    });
+
 
     it('will handle mixed upload / deletes',function(done){
         createConfigRunner();
