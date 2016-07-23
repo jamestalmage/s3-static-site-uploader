@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-var ConfigRunner = require('../src/ConfigRunner.js');
+var ConfigRunner = require('s3-upload/src/ConfigRunner.js');
 var path = require('path');
 
 var runner = new ConfigRunner();
