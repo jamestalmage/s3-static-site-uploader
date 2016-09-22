@@ -51,8 +51,8 @@ return function ConfigRunner(){
                             s3Wrapper.putObject(config.bucketName,obj.path,contents).then(function(){
                                 console.log('done uploading: ' + obj.path);
                             },function(reason){
-                                console.log('error uploading: ' + obj.path);
-                                console.log(reason);
+                                console.error('error uploading: ' + obj.path);
+                                console.error(reason);
                             });
                         });
 
@@ -64,7 +64,7 @@ return function ConfigRunner(){
                 deletes.forEach(function(path){console.log('\t' + path)});
                 s3Wrapper.deleteObjects(config.bucketName,deletes).then(
                     function(){console.log('delete successful')},
-                    function(reason){console.log('delete failed ' + reason); console.log(reason); });
+                    function(reason){console.error('delete failed ' + reason); console.log(reason); });
             }
         });
 
