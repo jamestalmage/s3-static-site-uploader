@@ -1,5 +1,6 @@
 var GlobRunnerStub = require('../test-lib/GlobRunnerStub.js');
 var RemoteRunnerStub = require('../test-lib/RemoteRunnerStub.js');
+var ExcludeFilter = require('../test-lib/ExcludeFilterStub.js');
 var SyncedFileCollectionStub = require('../test-lib/SyncedFileCollectionStub.js');
 var S3PromiseWrapperStub = require('../test-lib/S3PromiseWrapperStub.js');
 var fileUtilsStub = require('../test-lib/file-utils-stub.js');
@@ -8,7 +9,7 @@ var S3Stub = AWSStub.S3;
 
 
 var ConfigRunner = requireCov('../src/ConfigRunner.js').TestHook(
-    GlobRunnerStub,RemoteRunnerStub,SyncedFileCollectionStub,S3PromiseWrapperStub,AWSStub,fileUtilsStub
+    GlobRunnerStub,RemoteRunnerStub,ExcludeFilter,SyncedFileCollectionStub,S3PromiseWrapperStub,AWSStub,fileUtilsStub
 );
 
 
@@ -17,6 +18,7 @@ var remoteRunInstance = RemoteRunnerStub.instance;
 var collectionInstance = SyncedFileCollectionStub.instance;
 var s3Instance = S3Stub.instance;
 var s3WrapperInstance = S3PromiseWrapperStub.instance;
+var excludeFilterInstance = ExcludeFilter.instance;
 
 describe('ConfigRunner', function () {
     afterEach(function(){
@@ -25,19 +27,20 @@ describe('ConfigRunner', function () {
         SyncedFileCollectionStub.reset();
         AWSStub.reset();
         S3PromiseWrapperStub.reset();
+        ExcludeFilter.reset();
         fileUtilsStub.restore();
     });
 
-    function createConfig(bucketName,credentials,patterns){
+    function createConfig(bucketName,credentials,patterns,ignore){
         bucketName = bucketName || 'myBucket';
         credentials = credentials || './myCredentials.json';
         if(arguments.length < 3) {
             patterns = ['json/*.json'];
         }
-        else {
-            patterns = Array.prototype.slice.call(arguments,2);
+        if(arguments.length < 4){
+            ignore = [];
         }
-        return {bucketName:bucketName,credentials:credentials,patterns:patterns};
+        return {bucketName:bucketName,credentials:credentials,patterns:patterns,ignore:ignore};
     }
 
     function createConfigRunner(bucketName,credentials,patterns){
@@ -45,6 +48,11 @@ describe('ConfigRunner', function () {
         var runner = new ConfigRunner();
         runner.setConfig(config).run();
     }
+
+    it('creates a new ExcludeFilter', function(){
+        createConfigRunner();
+        expect(ExcludeFilter).to.have.been.calledOnce.and.calledWithNew;
+    });
 
     it('creates a new GlobRunner', function () {
         createConfigRunner();
@@ -103,11 +111,24 @@ describe('ConfigRunner', function () {
     });
 
     it('adds multiple config patterns to the globRunner',function (){
-        createConfigRunner(null,null,'json/*.json','src/*.js');
+        createConfigRunner(null,null,['json/*.json','src/*.js']);
         expect(globRunInstance(0).addPattern)
             .to.have.been.calledTwice
             .and.calledWith('json/*.json')
             .and.calledWith('src/*.js');
+    });
+
+    it('adds a single config pattern to the excludeFilter', function(){
+        createConfigRunner(null,null,['json/*.json'],['user/**']);
+        expect(excludeFilterInstance(0).addPattern).to.have.been.calledOnce.and.calledWith('user/**');
+    });
+
+    it('adds multiple config patterns to the excludeFilter',function (){
+        createConfigRunner(null,null,['json/*.json'],['user/**','config/*']);
+        expect(excludeFilterInstance(0).addPattern)
+            .to.have.been.calledTwice
+            .and.calledWith('user/**')
+            .and.calledWith('config/*');
     });
 
     it('calls run on the RemoteRunner',function(){

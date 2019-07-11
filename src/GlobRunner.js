@@ -2,7 +2,7 @@ function TestHook(Glob,Q){
     Glob = Glob || require('glob').Glob;
     Q = Q || require('q');
 
-return function GlobRunner(/*SyncedFileCollection*/ collection){
+return function GlobRunner(/*SyncedFileCollection*/ collection, /*ExcludeFilter*/ filter){
     var patterns = [];
     var globs = [];
 
@@ -27,6 +27,8 @@ return function GlobRunner(/*SyncedFileCollection*/ collection){
     }
 
     function onMatch(filePath){
+        // skip items that match the filter
+        if(filter.match(filePath)) return;
         collection.foundFile(filePath);
     }
 

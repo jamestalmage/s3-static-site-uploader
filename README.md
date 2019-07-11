@@ -3,7 +3,8 @@ Deploy static sites to Amazon S3 using Node!
 
 * Uploads are fast (only changed files are sent).
 * Old files (or files that no longer match the set of patterns) are deleted. Easily remove accidental uploads by simply changing the configuration and redeploying.
-* Configuration uses Ant Glob syntax. Easy to understand and update.  
+* Configuration uses Ant Glob syntax. Easy to understand and update.
+* Optionally ignore directories using the same Glob syntax.
 
 ```javascript
 module.exports = {
@@ -15,6 +16,9 @@ module.exports = {
 		"images/**/*.jpg",
 		"index.html"
 	]
+	ignore:[
+		"users/**"
+	]
 }
 ```
 
@@ -23,7 +27,7 @@ Install via npm: `npm install -g s3-upload`
 S3 Bucket Setup
 ===============
 
-Create a bucket 
+Create a bucket
 ---------------
 
 Log into your [AWS S3 console](https://console.aws.amazon.com) and create a new bucket for your site.
@@ -41,13 +45,13 @@ Bucket names must conform with DNS requirements:
 Configure the Bucket Static Website Hosting
 -------------------------------------------
 
-Once the bucket is created, select it and choose `Properties > Static Website Hosting`. 
+Once the bucket is created, select it and choose `Properties > Static Website Hosting`.
 
-Choose proper values for the `Index Document` and `Error Document` fields (i.e. **index.html** and **404.html**). 
+Choose proper values for the `Index Document` and `Error Document` fields (i.e. **index.html** and **404.html**).
 
 The Index Document is searched for relative to the requested folder: [http://my.aws.site.com/some/subfolder/]() **becomes** [http://my.aws.site.com/some/subfolder/**index.html**]().
-	
-The Error Document path is always relative to the root of the site. All errors are redirected to [http://my.aws.site.com/**404.html**](). 
+
+The Error Document path is always relative to the root of the site. All errors are redirected to [http://my.aws.site.com/**404.html**]().
 
 
 Configure a Public Readable Policy for the Bucket
@@ -75,7 +79,7 @@ Static sites hosted on S3 do not support private files (password protection, etc
 S3 User Setup
 =============
 
-Log into your [AWS Console](https://console.aws.amazon.com/iam/?#users) and go to the [Users](https://console.aws.amazon.com/iam/?#users) management console. Click the `Create New Users` button and enter a username. 
+Log into your [AWS Console](https://console.aws.amazon.com/iam/?#users) and go to the [Users](https://console.aws.amazon.com/iam/?#users) management console. Click the `Create New Users` button and enter a username.
 
 Credentials File
 ----------------
@@ -83,14 +87,14 @@ Credentials File
 Have AWS create a new key pair for the user and copy the contents into a `aws-credentials.json` file in the root directory of your project. You should add this file to `.gitignore` (or similar) so that credentials are not checked into version control.
 
 ```json
-{ 
-	"accessKeyId": "PUBLIC_KEY", 
-	"secretAccessKey": "SECRET_KEY", 
-	"region": "us-west-2" 
+{
+	"accessKeyId": "PUBLIC_KEY",
+	"secretAccessKey": "SECRET_KEY",
+	"region": "us-west-2"
 }
 ```
 
-**note**: As AWS SDK's documentation points out, you could also set those as `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables 
+**note**: As AWS SDK's documentation points out, you could also set those as `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables
 
 User Permissions
 ----------------

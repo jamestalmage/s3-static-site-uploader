@@ -21,6 +21,7 @@ var createParams = {
 
         return {
             Bucket:bucketName,
+            ACL: 'bucket-owner-full-control',
             Policy:policyString
         };
     },
@@ -32,6 +33,7 @@ var createParams = {
             Bucket:bucketName,
             Key: key,
             Body: body,//new Buffer(body),
+            ACL: 'bucket-owner-full-control',
             ContentType: mimeType
         };
     },

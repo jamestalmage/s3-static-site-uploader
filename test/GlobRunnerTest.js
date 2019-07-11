@@ -1,14 +1,16 @@
 var GlobStub = sinon.spy(require('../test-lib/GlobStub.js'));
-var CollectionStub = sinon.spy(require('./../test-lib/SyncedFileCollectionStub.js'));
+var CollectionStub = require('./../test-lib/SyncedFileCollectionStub.js');
+var ExcludeFilter = require('../src/ExcludeFilter.js');
 var GlobRunner = requireCov('../src/GlobRunner.js').TestHook(GlobStub);
 
 describe('GlobRunner', function () {
 
-    var globRunner,patterns,glob,collection;
+    var globRunner,patterns,glob,collection,filter;
 
     function new_GlobRunner(){
         //constructor injection of stubs
-        var ret = new GlobRunner(new CollectionStub(),GlobStub);
+        filter = new ExcludeFilter();
+        var ret = new GlobRunner(new CollectionStub(), filter);
 
         engine.patch(ret,'run');
 
@@ -112,10 +114,47 @@ describe('GlobRunner', function () {
             expect(glob(0).on).to.have.been.calledWith('end',match.any);
         });
 
-        it('triggering the onMatch listener will cause a matching foundFile call to the collection',function(){
+        it('onMatch calls will cause a matching foundFile call to the collection',function(){
             globRunner.addPattern('pattern1');
             globRunner.run();
             glob(0).fire('match','path/to/my/File');
+
+            expect(collection(0).foundFile)
+                .to.have.been
+                .calledOnce
+                .and.calledWith('path/to/my/File');
+        });
+
+        it('onMatch calls will cause a matching foundFile call for items not matching exclude',function(){
+            filter.addPattern('path/to/your/File');
+            globRunner.addPattern('pattern1');
+            globRunner.run();
+            glob(0).fire('match','path/to/my/File');
+
+            expect(collection(0).foundFile)
+                .to.have.been
+                .calledOnce
+                .and.calledWith('path/to/my/File');
+        });
+
+        it('onMatch calls will not cause a matching foundFile call for excluded items',function(){
+            filter.addPattern('path/to/**');
+            globRunner.addPattern('pattern1');
+            globRunner.run();
+            glob(0).fire('match','path/to/my/File');
+
+            expect(collection(0).foundFile)
+                .to.have.been
+                .not.called;
+        });
+
+        it('multiple excluded items function correctly',function(){
+            filter.addPattern('path/to/your/*');
+            filter.addPattern('path/to/your/Fi*');
+            globRunner.addPattern('pattern1');
+            globRunner.run();
+            glob(0).fire('match','path/to/my/File');
+            glob(0).fire('match','path/to/your/File');
 
             expect(collection(0).foundFile)
                 .to.have.been
